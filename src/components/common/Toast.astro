@@ -1,0 +1,40 @@
+---
+// src/components/common/Toast.astro
+// Toast notification component conforming to FE-06
+---
+
+<div 
+  id="app-toast" 
+  class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-300 opacity-0 pointer-events-none translate-y-4 max-w-md w-[90%] sm:w-auto"
+  role="alert" 
+  aria-live="polite"
+>
+  <div class="flex items-center gap-3 bg-neutral-900/95 backdrop-blur-md text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/10 text-sm md:text-base">
+    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <div id="toast-message" class="flex-1 font-medium leading-snug">
+      Thông báo
+    </div>
+  </div>
+</div>
+
+<script>
+  // Expose global showToast function
+  (window as any).showToast = function(message: string, duration = 4000) {
+    const toast = document.getElementById('app-toast');
+    const msgEl = document.getElementById('toast-message');
+    if (!toast || !msgEl) return;
+
+    msgEl.textContent = message;
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+    }, duration);
+  };
+</script>

@@ -1,0 +1,72 @@
+---
+// src/layouts/AdminLayout.astro
+import '../styles/global.css';
+import AdminNav from '../components/admin/AdminNav.astro';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+}
+
+const { title, subtitle } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+// Simple session check (AD-01)
+const cookieHeader = Astro.request.headers.get('cookie') || '';
+const hasSession = cookieHeader.includes('flower_admin_session=');
+
+if (!hasSession && currentPath !== '/admin/login') {
+  return Astro.redirect('/admin/login');
+}
+---
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | Quản trị Flower Shop</title>
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="bg-neutral-50 text-neutral-800 antialiased min-h-screen flex flex-col md:flex-row">
+    <!-- Admin Sidebar -->
+    <AdminNav currentPath={currentPath} />
+
+    <!-- Mobile Top Navigation Header -->
+    <header class="md:hidden bg-neutral-900 text-white p-4 flex items-center justify-between sticky top-0 z-30">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold">F</div>
+        <span class="font-serif font-bold text-sm">Flower Admin</span>
+      </div>
+      <div class="flex items-center gap-3 text-xs">
+        <a href="/admin/products" class="text-neutral-300 hover:text-white">Sản phẩm</a>
+        <a href="/admin/settings" class="text-neutral-300 hover:text-white">Cấu hình</a>
+        <a href="/admin/login" class="text-rose-400">Thoát</a>
+      </div>
+    </header>
+
+    <!-- Main Admin Workspace -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-7xl">
+      <!-- Page Title & Header Actions -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-neutral-200 gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-serif font-bold text-neutral-900 tracking-tight">
+            {title}
+          </h1>
+          {subtitle && (
+            <p class="text-xs sm:text-sm text-neutral-500 mt-1">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        <div class="flex items-center gap-3">
+          <slot name="header-actions" />
+        </div>
+      </div>
+
+      <!-- Main Slot Content -->
+      <slot />
+    </main>
+  </body>
+</html>

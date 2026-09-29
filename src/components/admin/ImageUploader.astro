@@ -1,0 +1,236 @@
+---
+// src/components/admin/ImageUploader.astro
+// Conforms to Section D.7: Max 5MB block + Browser client-side auto-resize max width 1920px
+interface Props {
+  id?: string;
+  label?: string;
+  coverOnly?: boolean;
+}
+
+const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = false } = Astro.props;
+---
+
+<div class="space-y-3" id={id}>
+  <label class="block text-sm font-semibold text-neutral-800">
+    {label}
+    <span class="text-xs font-normal text-neutral-500 block mt-0.5">
+      Tối đa 5MB. Tự động nén và resize bề ngang về tối đa 1920px bằng JS ngay trong trình duyệt.
+    </span>
+  </label>
+
+  <!-- Upload drop area -->
+  <div 
+    class="uploader-dropzone border-2 border-dashed border-neutral-300 hover:border-primary rounded-2xl p-6 text-center cursor-pointer transition-colors bg-white hover:bg-pink-50/20"
+  >
+    <input 
+      type="file" 
+      class="uploader-input hidden" 
+      accept="image/jpeg,image/png,image/webp" 
+      multiple={!coverOnly} 
+    />
+    
+    <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+      <div class="w-12 h-12 rounded-full bg-accent/60 text-primary flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <p class="text-sm font-medium text-neutral-700">
+        <span class="text-primary hover:underline">Bấm để chọn ảnh</span> hoặc kéo thả vào đây
+      </p>
+      <p class="text-xs text-neutral-400">JPG, PNG, WEBP (Tối đa 5MB / file)</p>
+    </div>
+  </div>
+
+  <!-- Progress / Status indicator -->
+  <div class="uploader-status hidden text-xs font-medium text-primary flex items-center gap-2">
+    <svg class="animate-spin h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <span class="status-text">Đang nén và tải ảnh lên...</span>
+  </div>
+
+  <!-- Preview list of uploaded images -->
+  <div class="uploader-preview-list grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<script>
+  // Image compression & upload logic conforming to Section D.7
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_WIDTH = 1920; // 1920px max width
+
+  function setupUploader() {
+    const containers = document.querySelectorAll('[id^="image-uploader"]');
+
+    containers.forEach(container => {
+      const dropzone = container.querySelector('.uploader-dropzone') as HTMLElement;
+      const input = container.querySelector('.uploader-input') as HTMLInputElement;
+      const statusEl = container.querySelector('.uploader-status') as HTMLElement;
+      const statusText = container.querySelector('.status-text') as HTMLElement;
+      const previewList = container.querySelector('.uploader-preview-list') as HTMLElement;
+
+      if (!dropzone || !input || !previewList) return;
+
+      dropzone.addEventListener('click', () => input.click());
+
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-primary', 'bg-pink-50/40');
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-primary', 'bg-pink-50/40');
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-primary', 'bg-pink-50/40');
+        if (e.dataTransfer && e.dataTransfer.files) {
+          handleFiles(e.dataTransfer.files);
+        }
+      });
+
+      input.addEventListener('change', () => {
+        if (input.files) {
+          handleFiles(input.files);
+        }
+      });
+
+      async function handleFiles(files: FileList) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+
+          // 1. Strict 5MB size limit check (Section D.7 requirement)
+          if (file.size > MAX_FILE_SIZE) {
+            alert(`File "${file.name}" vượt quá giới hạn 5MB (${(file.size / 1024 / 1024).toFixed(2)} MB). Hệ thống đã chặn chọn file này!`);
+            continue;
+          }
+
+          // 2. MIME type check
+          if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            alert(`File "${file.name}" không phải định dạng ảnh hợp lệ (chỉ chấp nhận JPEG, PNG, WEBP).`);
+            continue;
+          }
+
+          if (statusEl && statusText) {
+            statusEl.classList.remove('hidden');
+            statusText.textContent = `Đang xử lý & nén ảnh "${file.name}"...`;
+          }
+
+          try {
+            // 3. Browser client-side resize to max 1920px (Section D.7 requirement)
+            const processedBlob = await resizeImageClientSide(file, MAX_WIDTH);
+
+            // 4. Upload processed blob
+            statusText.textContent = `Đang tải ảnh "${file.name}" lên máy chủ...`;
+            const formData = new FormData();
+            formData.append('file', processedBlob, file.name);
+
+            const res = await fetch('/api/admin/media', {
+              method: 'POST',
+              body: formData
+            });
+
+            const result = await res.json();
+            if (result.success && result.data) {
+              addPreviewCard(result.data, previewList);
+            } else {
+              alert(result.error?.message || 'Lỗi khi tải ảnh');
+            }
+          } catch (err: any) {
+            alert('Lỗi xử lý ảnh: ' + (err.message || 'Không xác định'));
+          } finally {
+            if (statusEl) statusEl.classList.add('hidden');
+          }
+        }
+      }
+    });
+  }
+
+  // Client-side image resize using HTML5 Canvas (Section D.7)
+  function resizeImageClientSide(file: File, maxWidth: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let targetWidth = img.width;
+          let targetHeight = img.height;
+
+          // Resize if wider than maxWidth
+          if (targetWidth > maxWidth) {
+            targetHeight = Math.round((targetHeight * maxWidth) / targetWidth);
+            targetWidth = maxWidth;
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            return resolve(file); // fallback to original file if canvas not supported
+          }
+
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+          // Export as webp or jpeg with 0.88 quality
+          const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              resolve(file);
+            }
+          }, outputType, 0.88);
+        };
+        img.onerror = () => reject(new Error('Không thể đọc file ảnh'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Lỗi đọc file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Append thumbnail card to preview list
+  function addPreviewCard(data: any, container: HTMLElement) {
+    const card = document.createElement('div');
+    card.className = 'relative group rounded-xl overflow-hidden border border-neutral-200 aspect-[4/5] bg-neutral-100 image-item';
+    card.setAttribute('data-secure-url', data.secure_url);
+    card.setAttribute('data-public-id', data.public_id);
+    card.setAttribute('data-width', data.width);
+    card.setAttribute('data-height', data.height);
+
+    const isFirst = container.querySelectorAll('.image-item').length === 0;
+
+    card.innerHTML = `
+      <img src="${data.secure_url}" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
+        <div class="flex justify-between items-center">
+          <label class="text-[10px] text-white flex items-center gap-1 cursor-pointer bg-black/50 px-1.5 py-0.5 rounded">
+            <input type="radio" name="is_cover" value="${data.secure_url}" ${isFirst ? 'checked' : ''} class="cover-radio" />
+            <span>Ảnh bìa</span>
+          </label>
+          <button type="button" class="remove-btn text-white hover:text-rose-400 bg-black/50 p-1 rounded">
+            ✕
+          </button>
+        </div>
+        <div class="text-[10px] text-white/90">
+          <span>${data.width}x${data.height}</span>
+        </div>
+      </div>
+    `;
+
+    card.querySelector('.remove-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      card.remove();
+    });
+
+    container.appendChild(card);
+  }
+
+  // Initialize
+  setupUploader();
+</script>

@@ -1,0 +1,159 @@
+/* src/styles/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 141 59 97; /* #8D3B61 */
+    --color-accent: 246 217 229; /* #F6D9E5 */
+    --color-bg: 255 249 245; /* #FFF9F5 */
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: #241D21;
+    background-color: #FFF9F5;
+  }
+
+  body {
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Classes */
+  .glass-header {
+    background: rgba(255, 249, 245, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(141, 59, 97, 0.08);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(141, 59, 97, 0.1);
+    box-shadow: 0 10px 30px -10px rgba(141, 59, 97, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -15px rgba(141, 59, 97, 0.15);
+    border-color: rgba(141, 59, 97, 0.25);
+  }
+
+  /* Radial gradient hero inspired by DESIGN.docx "Soda" design */
+  .hero-radial-gradient {
+    background: radial-gradient(circle at 50% 30%, rgba(246, 217, 229, 0.6) 0%, rgba(255, 249, 245, 0.95) 70%, #FFF9F5 100%);
+  }
+
+  /* Interactive Pill Button */
+  .btn-pill-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    min-height: 44px; /* Touch target minimum 44px (FE-09, Section 12) */
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #8D3B61 0%, #70264A 100%);
+    color: #FFFFFF;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 20px rgba(141, 59, 97, 0.25);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-pill-primary:hover {
+    background: linear-gradient(135deg, #7A3253 0%, #5E1F3D 100%);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(141, 59, 97, 0.35);
+  }
+
+  .btn-pill-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    min-height: 44px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid rgba(141, 59, 97, 0.2);
+    color: #8D3B61;
+    font-weight: 600;
+    transition: all 0.25s ease;
+  }
+
+  .btn-pill-secondary:hover {
+    background: #FDF4F8;
+    border-color: #8D3B61;
+    transform: translateY(-2px);
+  }
+}
+
+/* Floating Petals Animation */
+@keyframes floatPetal {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-15px) rotate(15deg) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg) scale(0.9);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 14px rgba(0, 104, 255, 0);
+  }
+}
+
+.animate-floating {
+  animation: floatPetal 5s ease-in-out infinite;
+}
+
+.animate-floating-delay {
+  animation: floatPetal 6s ease-in-out infinite 2.5s;
+}
+
+.animate-zalo-pulse {
+  animation: pulseGlow 2.5s infinite;
+}
+
+/* Reduced Motion (FE-10 requirement) */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-floating,
+  .animate-floating-delay,
+  .animate-zalo-pulse,
+  .glass-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}

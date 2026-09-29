@@ -1,0 +1,97 @@
+---
+// src/layouts/PublicLayout.astro
+import '../styles/global.css';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+import FloatingZalo from '../components/common/FloatingZalo.astro';
+import Toast from '../components/common/Toast.astro';
+import type { SiteSettings } from '../types';
+
+interface Props {
+  settings: SiteSettings;
+  pageTitle?: string;
+  pageDescription?: string;
+}
+
+const { settings, pageTitle, pageDescription } = Astro.props;
+
+const title = pageTitle || settings.seo_config.meta_title;
+const description = pageDescription || settings.seo_config.meta_description;
+const ogImage = settings.seo_config.og_image;
+const canonicalDomain = settings.seo_config.canonical_domain || 'https://flowervibes.vn';
+
+// Structured Data (JSON-LD) for LocalBusiness / Florist (Section 11)
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Florist",
+  "name": settings.shop_info.name,
+  "description": description,
+  "url": canonicalDomain,
+  "telephone": settings.shop_info.hotline,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": settings.shop_info.address,
+    "addressLocality": "Hồ Chí Minh",
+    "addressCountry": "VN"
+  },
+  "openingHours": "Mo-Su 07:30-21:30",
+  "image": ogImage,
+  "priceRange": "300.000đ - 3.000.000đ"
+};
+---
+
+<!doctype html>
+<html lang="vi" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Meta Tags (Section 11) -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalDomain} />
+    <meta name="robots" content={settings.seo_config.robots || 'index, follow'} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalDomain} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </head>
+  <body class="bg-background text-textColor-primary antialiased selection:bg-accent selection:text-primary min-h-screen flex flex-col">
+    <!-- Header -->
+    <Header zaloConfig={settings.zalo_config} shopInfo={settings.shop_info} />
+
+    <!-- Main Page Content -->
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <Footer shopInfo={settings.shop_info} zaloConfig={settings.zalo_config} />
+
+    <!-- Floating Zalo Button (FE-08) -->
+    <FloatingZalo zaloConfig={settings.zalo_config} />
+
+    <!-- Global Toast Notification Container (FE-06) -->
+    <Toast />
+
+    <!-- Analytics & Scroll Depth Tracker (Section 14) -->
+    <script>
+      import { initScrollDepthTracker } from '../lib/analytics/tracker';
+      initScrollDepthTracker();
+    </script>
+  </body>
+</html>

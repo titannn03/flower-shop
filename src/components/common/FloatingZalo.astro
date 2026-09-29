@@ -1,0 +1,47 @@
+---
+// src/components/common/FloatingZalo.astro
+import type { ZaloConfig } from '../../types';
+
+interface Props {
+  zaloConfig: ZaloConfig;
+}
+
+const { zaloConfig } = Astro.props;
+---
+
+<div class="fixed bottom-6 right-6 z-40 flex items-center group">
+  <!-- Tooltip Bubble on Hover / Idle -->
+  <div class="hidden sm:flex items-center mr-3 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-lg border border-primary/10 text-xs font-semibold text-textColor-primary transform group-hover:scale-105 transition-all">
+    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-ping"></span>
+    Đang online • Tư vấn ngay
+  </div>
+
+  <!-- Floating Button -->
+  <a
+    id="floating-zalo-btn"
+    href={zaloConfig.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#0068FF] text-white flex items-center justify-center shadow-xl animate-zalo-pulse hover:scale-110 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
+    aria-label="Nhắn tin Zalo với tiệm hoa để được tư vấn và đặt hoa ngay"
+    data-cta-source="floating"
+  >
+    <svg class="w-8 h-8 sm:w-9 sm:h-9 fill-current" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.03 2 11c0 2.87 1.5 5.43 3.84 7.07-.17 1.05-.62 2.65-1.57 3.86 0 0 2.45-.3 4.25-1.54.48.07.97.11 1.48.11 5.52 0 10-4.03 10-9S17.52 2 12 2z"/>
+    </svg>
+  </a>
+</div>
+
+<script>
+  import { trackEvent } from '../../lib/analytics/tracker';
+
+  const floatingBtn = document.getElementById('floating-zalo-btn');
+  if (floatingBtn) {
+    floatingBtn.addEventListener('click', () => {
+      trackEvent('click_zalo', {
+        cta_location: 'floating',
+        page_path: window.location.pathname
+      });
+    });
+  }
+</script>

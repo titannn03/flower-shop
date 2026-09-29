@@ -1,0 +1,183 @@
+---
+// src/components/products/ProductCard.astro
+import type { Product, ZaloConfig } from '../../types';
+import { formatCurrencyVND } from '../../lib/validators/product';
+
+interface Props {
+  product: Product;
+  zaloConfig: ZaloConfig;
+}
+
+const { product, zaloConfig } = Astro.props;
+
+// Images handling: cover first, then gallery
+const images = product.images && product.images.length > 0
+  ? [...product.images].sort((a, b) => (b.is_cover ? 1 : 0) - (a.is_cover ? 1 : 0))
+  : [{
+      id: 'default-img',
+      secure_url: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      alt_text: product.name,
+      is_cover: true,
+      sort_order: 0
+    }];
+
+const coverImage = images[0];
+
+// BR-03: compare_at_price must be strictly greater than price to show discount
+const hasDiscount = Boolean(product.compare_at_price && product.compare_at_price > product.price);
+const discountPercent = hasDiscount 
+  ? Math.round(((product.compare_at_price! - product.price) / product.compare_at_price!) * 100)
+  : 0;
+
+const occasionSlugs = (product.occasions || []).map(o => o.slug).join(' ');
+---
+
+<article 
+  class="product-card group glass-card rounded-3xl overflow-hidden flex flex-col justify-between"
+  data-product-id={product.id}
+  data-product-slug={product.slug}
+  data-occasions={occasionSlugs}
+>
+  <div>
+    <!-- Image Media Container with Carousel / Dots (FE-04) -->
+    <div class="relative overflow-hidden aspect-[4/5] bg-pink-50/50">
+      <!-- Main Image -->
+      <img
+        src={coverImage.secure_url}
+        alt={coverImage.alt_text || product.name}
+        class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+        width="600"
+        height="750"
+      />
+
+      <!-- Badges -->
+      <div class="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+        {product.featured && (
+          <span class="bg-primary text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md">
+            ★ Nổi bật
+          </span>
+        )}
+        {hasDiscount && (
+          <span class="bg-rose-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
+            -{discountPercent}%
+          </span>
+        )}
+      </div>
+
+      <!-- Quick Delivery Badge -->
+      <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-semibold text-textColor-primary flex items-center gap-1 shadow-sm">
+        <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+        Giao 2H
+      </div>
+    </div>
+
+    <!-- Product Info Details -->
+    <div class="p-5">
+      <!-- Occasion tags -->
+      {product.occasions && product.occasions.length > 0 && (
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          {product.occasions.slice(0, 2).map(occ => (
+            <span class="text-[11px] font-medium text-primary/80 bg-accent/30 px-2 py-0.5 rounded-md">
+              {occ.name}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <!-- Title -->
+      <h3 class="font-serif font-bold text-lg text-textColor-primary leading-snug group-hover:text-primary transition-colors">
+        {product.name}
+      </h3>
+
+      <!-- Short Description -->
+      {product.short_description && (
+        <p class="mt-2 text-xs sm:text-sm text-textColor-secondary line-clamp-2 leading-relaxed">
+          {product.short_description}
+        </p>
+      )}
+
+      <!-- Flower Components info -->
+      {product.flower_components && (
+        <div class="mt-2.5 pt-2.5 border-t border-primary/10 flex items-center gap-1 text-[11px] text-textColor-muted">
+          <span class="font-semibold text-textColor-secondary">Hoa chính:</span>
+          <span class="truncate">{product.flower_components}</span>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- Price & Order CTA Section (FE-05 & FE-06) -->
+  <div class="px-5 pb-5 pt-2 border-t border-primary/10 flex items-center justify-between gap-3">
+    <!-- Pricing Display -->
+    <div>
+      {hasDiscount && (
+        <span class="text-xs text-textColor-muted line-through block font-medium">
+          {formatCurrencyVND(product.compare_at_price!)}
+        </span>
+      )}
+      <span class="text-lg sm:text-xl font-bold text-primary font-serif">
+        {formatCurrencyVND(product.price)}
+      </span>
+    </div>
+
+    <!-- CTA Button with Copy-to-Clipboard & Zalo trigger (FE-06 requirement) -->
+    <button
+      type="button"
+      class="product-cta-btn btn-pill-primary text-xs sm:text-sm py-2.5 px-4 shadow-sm"
+      data-product-name={product.name}
+      data-product-id={product.id}
+      data-product-slug={product.slug}
+      data-zalo-url={zaloConfig.url}
+      aria-label={`Đặt mua ${product.name} qua Zalo`}
+    >
+      <svg class="w-4 h-4 fill-current mr-1" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.03 2 11c0 2.87 1.5 5.43 3.84 7.07-.17 1.05-.62 2.65-1.57 3.86 0 0 2.45-.3 4.25-1.54.48.07.97.11 1.48.11 5.52 0 10-4.03 10-9S17.52 2 12 2z"/>
+      </svg>
+      <span>Đặt Hoa</span>
+    </button>
+  </div>
+</article>
+
+<script>
+  import { trackEvent } from '../../lib/analytics/tracker';
+
+  // Attach click listener for FE-06 implementation
+  document.querySelectorAll('.product-cta-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const button = e.currentTarget as HTMLButtonElement;
+      const productName = button.getAttribute('data-product-name') || '';
+      const productId = button.getAttribute('data-product-id') || '';
+      const productSlug = button.getAttribute('data-product-slug') || '';
+      const zaloUrl = button.getAttribute('data-zalo-url') || 'https://zalo.me';
+
+      // 1. Copy product name to clipboard
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(`Tư vấn giúp mình mẫu: ${productName}`);
+        }
+      } catch (err) {
+        console.warn('Clipboard copy failed:', err);
+      }
+
+      // 2. Show Toast notification (FE-06 requirement)
+      if ((window as any).showToast) {
+        (window as any).showToast('Đã copy tên mẫu hoa, hãy dán vào ô chat Zalo để shop tư vấn ngay nhé!', 4500);
+      }
+
+      // 3. Track event in analytics
+      trackEvent('click_zalo', {
+        cta_location: 'product_card',
+        product_id: productId || productSlug,
+        page_path: window.location.pathname
+      });
+
+      // 4. Open Zalo after short delay to allow toast & copy
+      setTimeout(() => {
+        window.open(zaloUrl, '_blank', 'noopener,noreferrer');
+      }, 700);
+    });
+  });
+</script>

@@ -1,0 +1,148 @@
+---
+// src/components/landing/Hero.astro
+import type { HeroConfig, ZaloConfig } from '../../types';
+import PetalParticles from '../common/PetalParticles.astro';
+
+interface Props {
+  heroConfig: HeroConfig;
+  zaloConfig: ZaloConfig;
+}
+
+const { heroConfig, zaloConfig } = Astro.props;
+---
+
+<section id="hero" class="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32 hero-radial-gradient min-h-[90vh] flex items-center">
+  <!-- Decorative floating petals -->
+  <PetalParticles />
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+      
+      <!-- Left Column: Copy & CTAs -->
+      <div class="lg:col-span-7 text-center lg:text-left space-y-6">
+        
+        <!-- Eyebrow Pill -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/60 border border-primary/15 text-primary text-xs sm:text-sm font-bold uppercase tracking-wider shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+          <span>{heroConfig.eyebrow}</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-textColor-primary leading-[1.15] tracking-tight">
+          {heroConfig.headline}
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="text-base sm:text-lg text-textColor-secondary max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+          {heroConfig.subheadline}
+        </p>
+
+        <!-- CTA Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+          <!-- Primary CTA to Zalo (FE-02) -->
+          <a
+            id="hero-zalo-cta"
+            href={zaloConfig.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-pill-primary w-full sm:w-auto text-base sm:text-lg shadow-lg group"
+            data-cta-source="hero"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 fill-current transform group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.03 2 11c0 2.87 1.5 5.43 3.84 7.07-.17 1.05-.62 2.65-1.57 3.86 0 0 2.45-.3 4.25-1.54.48.07.97.11 1.48.11 5.52 0 10-4.03 10-9S17.52 2 12 2z"/>
+            </svg>
+            <span>{heroConfig.cta_label || 'Tư Vấn & Đặt Hoa Ngay'}</span>
+          </a>
+
+          <!-- Secondary CTA anchor to products -->
+          <a
+            href="#san-pham"
+            class="btn-pill-secondary w-full sm:w-auto text-base"
+          >
+            <span>{heroConfig.cta_secondary_label || 'Khám Phá Bộ Sưu Tập'}</span>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </a>
+        </div>
+
+        <!-- Social Proof Metrics Bar -->
+        <div class="pt-8 border-t border-primary/10 grid grid-cols-3 gap-4 text-center sm:text-left max-w-lg mx-auto lg:mx-0">
+          <div>
+            <p class="text-2xl sm:text-3xl font-serif font-bold text-primary">5.000+</p>
+            <p class="text-xs text-textColor-secondary font-medium mt-0.5">Bó hoa trao tay</p>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-serif font-bold text-primary">120 Phút</p>
+            <p class="text-xs text-textColor-secondary font-medium mt-0.5">Giao hỏa tốc</p>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-serif font-bold text-primary">99.8%</p>
+            <p class="text-xs text-textColor-secondary font-medium mt-0.5">Khách hài lòng</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Visual Floral Hero Showcase -->
+      <div class="lg:col-span-5 relative flex items-center justify-center">
+        <!-- Ambient Glowing Aura -->
+        <div class="absolute w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-gradient-to-tr from-accent to-pink-200 blur-2xl opacity-70"></div>
+
+        <!-- Central Product Visual Glass Card -->
+        <div class="relative z-10 glass-card rounded-3xl p-4 sm:p-5 max-w-md w-full shadow-2xl border-white/80">
+          <div class="relative overflow-hidden rounded-2xl aspect-[4/5] bg-pink-50">
+            <!-- Hero Featured Image -->
+            <img 
+              src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80" 
+              alt="Bó hoa hồng đỏ Ecuador Khúc Tình Ca" 
+              class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
+              loading="eager"
+              fetchpriority="high"
+              width="600"
+              height="750"
+            />
+
+            <!-- Floating Overlay Badges -->
+            <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md text-xs font-bold text-primary flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Bán chạy nhất hôm nay
+            </div>
+
+            <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full text-white text-xs font-semibold flex items-center gap-1">
+              ⚡ Giao ngay 2h
+            </div>
+          </div>
+
+          <!-- Quick Preview Card Info -->
+          <div class="mt-4 flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-wider text-primary font-semibold">Mẫu thiết kế độc quyền</p>
+              <h3 class="text-base sm:text-lg font-serif font-bold text-textColor-primary mt-0.5">Juliet Rose Melody</h3>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-textColor-muted line-through block">780.000 ₫</span>
+              <span class="text-lg font-bold text-primary">650.000 ₫</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  import { trackEvent } from '../../lib/analytics/tracker';
+
+  const heroCta = document.getElementById('hero-zalo-cta');
+  if (heroCta) {
+    heroCta.addEventListener('click', () => {
+      trackEvent('click_zalo', {
+        cta_location: 'hero',
+        page_path: window.location.pathname
+      });
+    });
+  }
+</script>

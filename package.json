@@ -1,0 +1,30 @@
+{
+  "name": "flower-shop",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Website Bán Hoa - Landing Page chuyển đổi qua Zalo + Admin Dashboard",
+  "scripts": {
+    "dev": "astro dev --host",
+    "start": "astro dev --host",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "test": "npx tsx tests/test-scenarios.ts",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/node": "^9.0.0",
+    "@astrojs/tailwind": "^5.1.5",
+    "@supabase/supabase-js": "^2.48.1",
+    "astro": "^5.4.2",
+    "clsx": "^2.1.1",
+    "lucide": "^0.475.0",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "tsx": "^4.23.15"
+  }
+}

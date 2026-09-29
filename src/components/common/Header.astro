@@ -1,0 +1,185 @@
+---
+// src/components/common/Header.astro
+import type { ZaloConfig, ShopInfo } from '../../types';
+
+interface Props {
+  zaloConfig: ZaloConfig;
+  shopInfo: ShopInfo;
+}
+
+const { zaloConfig, shopInfo } = Astro.props;
+---
+
+<header class="sticky top-0 z-40 w-full glass-header transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      
+      <!-- Brand Logo & Name -->
+      <a href="#hero" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-1">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white shadow-md transform group-hover:scale-105 transition-transform">
+          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21a9 9 0 01-9-9c0-4.97 4.03-9 9-9s9 4.03 9 9a9 9 0 01-9 9zm0 0v-6m-4-3a4 4 0 118 0 4 4 0 01-8 0z" />
+          </svg>
+        </div>
+        <div>
+          <span class="block text-xl font-serif font-bold text-textColor-primary tracking-wide group-hover:text-primary transition-colors">
+            {shopInfo.name || 'FLOWER VIBES'}
+          </span>
+          <span class="hidden sm:block text-xs uppercase tracking-widest text-textColor-secondary font-medium">
+            Artistic Floral Studio
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Menu (Anchor Links with Active State) -->
+      <nav class="hidden md:flex items-center gap-1 lg:gap-2">
+        <a href="#san-pham" class="nav-link px-3.5 py-2 text-sm font-semibold text-textColor-secondary hover:text-primary transition-colors rounded-full hover:bg-white/60">
+          Sản phẩm
+        </a>
+        <a href="#video" class="nav-link px-3.5 py-2 text-sm font-semibold text-textColor-secondary hover:text-primary transition-colors rounded-full hover:bg-white/60">
+          Video & Câu chuyện
+        </a>
+        <a href="#cam-ket" class="nav-link px-3.5 py-2 text-sm font-semibold text-textColor-secondary hover:text-primary transition-colors rounded-full hover:bg-white/60">
+          Cam kết
+        </a>
+        <a href="#danh-gia" class="nav-link px-3.5 py-2 text-sm font-semibold text-textColor-secondary hover:text-primary transition-colors rounded-full hover:bg-white/60">
+          Đánh giá
+        </a>
+        <a href="#lien-he" class="nav-link px-3.5 py-2 text-sm font-semibold text-textColor-secondary hover:text-primary transition-colors rounded-full hover:bg-white/60">
+          Liên hệ
+        </a>
+      </nav>
+
+      <!-- Header CTA & Mobile Toggle -->
+      <div class="flex items-center gap-3">
+        <!-- Zalo CTA Header Button -->
+        <a 
+          href={zaloConfig.url} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="btn-pill-primary text-xs sm:text-sm py-2 sm:py-2.5 px-4 sm:px-6 shadow-md header-zalo-cta"
+          data-cta-source="nav"
+        >
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.03 2 11c0 2.87 1.5 5.43 3.84 7.07-.17 1.05-.62 2.65-1.57 3.86 0 0 2.45-.3 4.25-1.54.48.07.97.11 1.48.11 5.52 0 10-4.03 10-9S17.52 2 12 2z"/>
+          </svg>
+          <span>Chat Zalo</span>
+        </a>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button 
+          id="mobile-menu-btn" 
+          type="button" 
+          class="md:hidden inline-flex items-center justify-center p-2 rounded-xl text-textColor-secondary hover:text-primary hover:bg-white/80 focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-expanded="false" 
+          aria-label="Mở menu điều hướng"
+        >
+          <svg id="menu-icon-open" class="w-6 h-6 block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-primary/10 bg-background-card/95 backdrop-blur-lg px-4 pt-3 pb-6 space-y-2">
+    <a href="#san-pham" class="mobile-nav-link block px-4 py-3 rounded-xl text-base font-medium text-textColor-secondary hover:text-primary hover:bg-white/80">
+      🌸 Bộ sưu tập mẫu hoa
+    </a>
+    <a href="#video" class="mobile-nav-link block px-4 py-3 rounded-xl text-base font-medium text-textColor-secondary hover:text-primary hover:bg-white/80">
+      🎬 Video cắm hoa & Stories
+    </a>
+    <a href="#cam-ket" class="mobile-nav-link block px-4 py-3 rounded-xl text-base font-medium text-textColor-secondary hover:text-primary hover:bg-white/80">
+      ✨ 4 Cam kết dịch vụ
+    </a>
+    <a href="#danh-gia" class="mobile-nav-link block px-4 py-3 rounded-xl text-base font-medium text-textColor-secondary hover:text-primary hover:bg-white/80">
+      ⭐ Khách hàng đánh giá
+    </a>
+    <a href="#lien-he" class="mobile-nav-link block px-4 py-3 rounded-xl text-base font-medium text-textColor-secondary hover:text-primary hover:bg-white/80">
+      📍 Thông tin liên hệ
+    </a>
+    <div class="pt-2">
+      <a 
+        href={zaloConfig.url} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="w-full btn-pill-primary text-center justify-center py-3"
+      >
+        Nhắn Zalo Tư Vấn Ngay
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  import { trackEvent } from '../../lib/analytics/tracker';
+
+  // Mobile menu toggle
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+
+  if (menuBtn && mobileMenu && iconOpen && iconClose) {
+    menuBtn.addEventListener('click', () => {
+      const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+      menuBtn.setAttribute('aria-expanded', String(!isExpanded));
+      mobileMenu.classList.toggle('hidden');
+      iconOpen.classList.toggle('hidden');
+      iconClose.classList.toggle('hidden');
+    });
+
+    // Close menu when clicking any link
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+        iconOpen.classList.remove('hidden');
+        iconClose.classList.add('hidden');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  // Active state for navigation links based on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  window.addEventListener('scroll', () => {
+    let currentId = '';
+    const scrollY = window.pageYOffset;
+
+    sections.forEach(section => {
+      const sectionHeight = (section as HTMLElement).offsetHeight;
+      const sectionTop = (section as HTMLElement).offsetTop - 120;
+      const sectionId = section.getAttribute('id') || '';
+
+      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+        currentId = sectionId;
+      }
+    });
+
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === `#${currentId}`) {
+        link.classList.add('text-primary', 'bg-white/80', 'shadow-sm');
+        link.classList.remove('text-textColor-secondary');
+      } else {
+        link.classList.remove('text-primary', 'bg-white/80', 'shadow-sm');
+        link.classList.add('text-textColor-secondary');
+      }
+    });
+  }, { passive: true });
+
+  // Track nav CTA click
+  document.querySelector('.header-zalo-cta')?.addEventListener('click', () => {
+    trackEvent('click_zalo', {
+      cta_location: 'nav',
+      page_path: window.location.pathname
+    });
+  });
+</script>

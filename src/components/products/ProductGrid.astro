@@ -1,0 +1,121 @@
+---
+// src/components/products/ProductGrid.astro
+import type { Product, Occasion, ZaloConfig } from '../../types';
+import ProductCard from './ProductCard.astro';
+import OccasionFilter from './OccasionFilter.astro';
+
+interface Props {
+  products: Product[];
+  occasions: Occasion[];
+  zaloConfig: ZaloConfig;
+}
+
+const { products, occasions, zaloConfig } = Astro.props;
+---
+
+<section id="san-pham" class="py-16 md:py-24 bg-background">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Section Header -->
+    <div class="text-center max-w-3xl mx-auto mb-10 space-y-3">
+      <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-accent/50 text-primary text-xs font-bold uppercase tracking-wider">
+        <span>🌸 Tuyển Chọn Tươi Mới</span>
+      </div>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-textColor-primary">
+        Mẫu Hoa Tươi Nghệ Thuật Được Yêu Thích
+      </h2>
+      <p class="text-sm sm:text-base text-textColor-secondary font-normal">
+        Khám phá các thiết kế hoa tươi tinh tế cho mọi dịp đặc biệt. Mỗi tác phẩm đều được cắm thủ công bởi nghệ nhân.
+      </p>
+    </div>
+
+    <!-- Occasion Filters -->
+    <div class="mb-10">
+      <OccasionFilter occasions={occasions} activeSlug="all" />
+    </div>
+
+    <!-- Products Grid -->
+    {products && products.length > 0 ? (
+      <div id="product-grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {products.map((product) => (
+          <ProductCard product={product} zaloConfig={zaloConfig} />
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16 px-4 bg-white/60 rounded-3xl border border-primary/10 max-w-lg mx-auto">
+        <div class="w-16 h-16 mx-auto mb-4 text-primary/40 flex items-center justify-center bg-accent/40 rounded-full">
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-serif font-bold text-textColor-primary">Chưa có sản phẩm trong danh mục này</h3>
+        <p class="text-xs sm:text-sm text-textColor-secondary mt-1">Shop đang cập nhật thêm các mẫu hoa mới nhất.</p>
+      </div>
+    )}
+
+    <!-- No Match Dynamic Filter Empty State -->
+    <div id="filter-empty-state" class="hidden text-center py-16 px-4 bg-white/60 rounded-3xl border border-primary/10 max-w-lg mx-auto mt-6">
+      <p class="text-base font-serif font-medium text-textColor-primary">Không tìm thấy mẫu hoa phù hợp với bộ lọc đã chọn</p>
+      <button type="button" id="reset-filter-btn" class="mt-4 btn-pill-secondary text-xs">
+        Xem tất cả mẫu hoa
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  // Filter interaction
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const productCards = document.querySelectorAll('.product-card');
+  const emptyState = document.getElementById('filter-empty-state');
+  const resetBtn = document.getElementById('reset-filter-btn');
+
+  function applyFilter(slug: string) {
+    let visibleCount = 0;
+
+    filterBtns.forEach(btn => {
+      const btnSlug = btn.getAttribute('data-filter-slug');
+      if (btnSlug === slug) {
+        btn.classList.add('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20', 'scale-105');
+        btn.classList.remove('bg-white/80', 'text-textColor-secondary');
+      } else {
+        btn.classList.remove('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20', 'scale-105');
+        btn.classList.add('bg-white/80', 'text-textColor-secondary');
+      }
+    });
+
+    productCards.forEach(card => {
+      const cardEl = card as HTMLElement;
+      const occasions = (cardEl.getAttribute('data-occasions') || '').split(' ');
+      
+      if (slug === 'all' || occasions.includes(slug)) {
+        cardEl.style.display = 'flex';
+        visibleCount++;
+      } else {
+        cardEl.style.display = 'none';
+      }
+    });
+
+    if (emptyState) {
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slug = btn.getAttribute('data-filter-slug') || 'all';
+      applyFilter(slug);
+    });
+  });
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      applyFilter('all');
+    });
+  }
+</script>

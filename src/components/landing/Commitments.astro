@@ -1,0 +1,71 @@
+---
+// src/components/landing/Commitments.astro
+import type { Commitment } from '../../types';
+
+interface Props {
+  commitments: Commitment[];
+}
+
+const { commitments } = Astro.props;
+
+// Icon map helper
+function renderIcon(iconKey: string) {
+  switch (iconKey) {
+    case 'sparkles':
+      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />`;
+    case 'clock':
+      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />`;
+    case 'gift':
+      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V6a2 2 0 10-2 2h2zm0 0v4m0 0H7m5 0h5m-9 9h8a2 2 0 002-2v-5H6v5a2 2 0 002 2z" />`;
+    case 'shield-check':
+      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />`;
+    default:
+      return `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 13l4 4L19 7" />`;
+  }
+}
+---
+
+{commitments && commitments.length > 0 && (
+  <section id="cam-ket" class="py-16 md:py-24 bg-background relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-accent/60 text-primary text-xs font-bold uppercase tracking-wider">
+          <span>🛡 An Tâm Đặt Hoa</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-textColor-primary">
+          4 Cam Kết Vàng Về Chất Lượng
+        </h2>
+        <p class="text-sm sm:text-base text-textColor-secondary font-normal">
+          Mỗi đơn hàng gửi trao là sự tín nhiệm quý giá. Chúng tôi cam kết mang lại trải nghiệm hoa tươi trọn vẹn nhất.
+        </p>
+      </div>
+
+      <!-- Commitments Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {commitments.map((com) => (
+          <div class="glass-card rounded-3xl p-6 sm:p-7 flex flex-col items-center text-center group">
+            <!-- Icon Container -->
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-accent/80 to-white text-primary flex items-center justify-center mb-5 shadow-sm group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <Fragment set:html={renderIcon(com.icon_key)} />
+              </svg>
+            </div>
+
+            <!-- Title -->
+            <h3 class="font-serif font-bold text-lg text-textColor-primary leading-snug mb-2">
+              {com.title}
+            </h3>
+
+            <!-- Description -->
+            <p class="text-xs sm:text-sm text-textColor-secondary leading-relaxed font-normal">
+              {com.description}
+            </p>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  </section>
+)}
