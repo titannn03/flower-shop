@@ -76,17 +76,34 @@ ON CONFLICT DO NOTHING;
 INSERT INTO public.site_settings (key, value) VALUES
 ('zalo_config', '{
   "url": "https://zalo.me/0901234567",
-  "hotline": "0901.234.567",
-  "zalo_oa_id": "1234567890123"
+  "hotline": "0939.206.602",
+  "zalo_oa_id": "0939206602"
 }'),
 ('shop_info', '{
-  "name": "FLOWER VIBES STUDIO",
-  "slogan": "Trao Gửi Yêu Thương - Đong Đầy Xúc Cảm",
-  "address": "128 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh",
-  "hotline": "0901.234.567",
-  "email": "contact@flowervibes.vn",
-  "opening_hours": "07:30 - 21:30 (Mỗi ngày, kể cả Lễ Tết)",
-  "copyright": "© 2026 FLOWER VIBES STUDIO. All rights reserved."
+  "name": "TIỆM HOA AN KHÁNH",
+      "slogan": "Trao Gửi Yêu Thương - Đong Đầy Xúc Cảm",
+      "address": "126 Trần Bạch Đằng, phường An Khánh (cũ), quận Ninh Kiều, TP. Cần Thơ",
+      "addresses": [
+        {
+          "id": "branch-1",
+          "label": "Chi nhánh 1",
+          "address": "126 Trần Bạch Đằng, phường An Khánh (cũ), quận Ninh Kiều, TP. Cần Thơ"
+        },
+        {
+          "id": "branch-2",
+          "label": "Chi nhánh 2",
+          "address": "2025 Hùng Vương, Tp Ngã Bảy (chỉ nhận đặt trước)"
+        },
+        {
+          "id": "branch-3",
+          "label": "Chi nhánh 3",
+          "address": "Thị Trấn Long Hồ - Tỉnh Vĩnh Long (chỉ nhận đặt trước)"
+        }
+      ],
+      "hotline": "0939.206.602",
+      "email": "contact@flowervibes.vn",
+      "opening_hours": "08:00 - 22:00 (Mỗi ngày, kể cả Lễ Tết)",
+      "copyright": "© 2026 FLOWER VIBES STUDIO. All rights reserved."
 }'),
 ('hero_config', '{
   "eyebrow": "TIỆM HOA NGHỆ THUẬT & QUÀ TẶNG CẢM XÚC",
@@ -97,7 +114,7 @@ INSERT INTO public.site_settings (key, value) VALUES
 }'),
 ('seo_config', '{
   "meta_title": "FLOWER VIBES - Tiệm Hoa Tươi Nghệ Thuật & Quà Tặng Giao Nhanh 2H",
-  "meta_description": "Tiệm hoa tươi cao cấp giao nhanh 2 giờ tại TP.HCM. Hoa sinh nhật, khai trương, tốt nghiệp, hoa tình yêu thiết kế tinh tế. Chat Zalo nhận mẫu và ưu đãi ngay!",
+  "meta_description": "Tiệm hoa tươi cao cấp giao nhanh nội ô TP. Cần Thơ. Hoa sinh nhật, khai trương, tốt nghiệp, hoa tình yêu thiết kế tinh tế. Chat Zalo nhận mẫu và ưu đãi ngay!",
   "og_image": "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=1200&q=80",
   "canonical_domain": "https://flowervibes.vn",
   "robots": "index, follow"

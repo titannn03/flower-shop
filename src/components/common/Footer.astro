@@ -1,6 +1,6 @@
 ---
 // src/components/common/Footer.astro
-import type { ShopInfo, ZaloConfig } from '../../types';
+import { normalizeShopAddresses, type ShopInfo, type ZaloConfig } from '../../types';
 
 interface Props {
   shopInfo: ShopInfo;
@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { shopInfo, zaloConfig } = Astro.props;
+const shopAddresses = normalizeShopAddresses(shopInfo);
 ---
 
 <footer id="lien-he" class="bg-neutral-900 text-neutral-300 pt-16 pb-12 border-t border-neutral-800">
@@ -27,7 +28,7 @@ const { shopInfo, zaloConfig } = Astro.props;
           </span>
         </div>
         <p class="text-sm text-neutral-400 max-w-sm leading-relaxed">
-          {shopInfo.slogan || 'Trao Gửi Yêu Thương - Đong Đầy Xúc Cảm'}. Cung cấp hoa tươi nghệ thuật, hoa sinh nhật, khai trương và sự kiện giao nhanh 2 giờ tại TP.HCM và các tỉnh lân cận.
+          {shopInfo.slogan || 'Trao Gửi Yêu Thương - Đong Đầy Xúc Cảm'}. Cung cấp hoa tươi nghệ thuật, hoa sinh nhật, khai trương và sự kiện giao nhanh trong nội ô TP. Cần Thơ.
         </p>
 
         <!-- Social Links -->
@@ -64,13 +65,26 @@ const { shopInfo, zaloConfig } = Astro.props;
           Cửa hàng & Hotline
         </h4>
         <div class="space-y-2.5 text-sm text-neutral-400">
-          <p class="flex items-start gap-2.5">
-            <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            <span>{shopInfo.address}</span>
-          </p>
+          {shopAddresses.length > 0 ? shopAddresses.map((addressItem) => (
+            <p class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <span>
+                {addressItem.label && <span class="block font-semibold text-white">{addressItem.label}</span>}
+                <span>{addressItem.address}</span>
+              </span>
+            </p>
+          )) : (
+            <p class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <span>{shopInfo.address}</span>
+            </p>
+          )}
           <p class="flex items-center gap-2.5">
             <svg class="w-5 h-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
@@ -98,7 +112,6 @@ const { shopInfo, zaloConfig } = Astro.props;
           </a>
         </div>
       </div>
-
     </div>
 
     <!-- Copyright and Admin portal entry -->

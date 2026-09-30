@@ -76,6 +76,14 @@ async function runTests() {
     `Invalid phone number format: ${rawPhone}`
   );
 
+  const shopAddresses = settings.shop_info.addresses ?? [];
+  assert(
+    'BR-02b: Shop can store exactly 3 branch addresses',
+    'BR',
+    Array.isArray(shopAddresses) && shopAddresses.length === 3 && shopAddresses.every(item => item && typeof item.address === 'string' && item.address.trim().length > 0),
+    `Expected 3 configured addresses, got ${shopAddresses.length}`
+  );
+
   // ----------------------------------------------------
   // BR-03: Price Display in VND
   // ----------------------------------------------------

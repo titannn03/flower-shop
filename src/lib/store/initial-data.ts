@@ -314,6 +314,23 @@ export const initialSettings: SiteSettings = {
     name: 'FLOWER VIBES STUDIO',
     slogan: 'Trao Gửi Yêu Thương - Đong Đầy Xúc Cảm',
     address: '128 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh',
+    addresses: [
+      {
+        id: 'branch-1',
+        label: 'Chi nhánh 1',
+        address: '128 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh'
+      },
+      {
+        id: 'branch-2',
+        label: 'Chi nhánh 2',
+        address: '2025 Hùng Vương, Tp Ngã Bảy, Đồng Tháp (chỉ nhận đặt trước)'
+      },
+      {
+        id: 'branch-3',
+        label: 'Chi nhánh 3',
+        address: 'Thị Trấn Long Hồ - Tỉnh Vĩnh Long (chỉ nhận đặt trước)'
+      }
+    ],
     hotline: '0901.234.567',
     email: 'contact@flowervibes.vn',
     opening_hours: '07:30 - 21:30 (Mỗi ngày, kể cả Lễ Tết)',

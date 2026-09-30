@@ -5,7 +5,7 @@ import Header from '../components/common/Header.astro';
 import Footer from '../components/common/Footer.astro';
 import FloatingZalo from '../components/common/FloatingZalo.astro';
 import Toast from '../components/common/Toast.astro';
-import type { SiteSettings } from '../types';
+import { normalizeShopAddresses, type SiteSettings } from '../types';
 
 interface Props {
   settings: SiteSettings;
@@ -24,6 +24,21 @@ const ogImage = customOgImage || settings.seo_config.og_image;
 const canonicalDomain = canonicalUrl || settings.seo_config.canonical_domain || 'https://flowervibes.vn';
 
 // Structured Data (JSON-LD) for LocalBusiness / Florist (Section 11)
+const shopAddresses = normalizeShopAddresses(settings.shop_info);
+const structuredAddress = shopAddresses.length > 0
+  ? shopAddresses.map((addressItem) => ({
+      "@type": "PostalAddress",
+      "streetAddress": addressItem.address,
+      "addressLocality": "Hồ Chí Minh",
+      "addressCountry": "VN"
+    }))
+  : {
+      "@type": "PostalAddress",
+      "streetAddress": settings.shop_info.address,
+      "addressLocality": "Hồ Chí Minh",
+      "addressCountry": "VN"
+    };
+
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "Florist",
@@ -31,12 +46,7 @@ const structuredData = {
   "description": description,
   "url": canonicalDomain,
   "telephone": settings.shop_info.hotline,
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": settings.shop_info.address,
-    "addressLocality": "Hồ Chí Minh",
-    "addressCountry": "VN"
-  },
+  "address": structuredAddress,
   "openingHours": "Mo-Su 07:30-21:30",
   "image": ogImage,
   "priceRange": "300.000đ - 3.000.000đ"

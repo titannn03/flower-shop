@@ -93,14 +93,54 @@ export interface ZaloConfig {
   zalo_oa_id?: string;
 }
 
+export interface ShopAddress {
+  id?: string;
+  label: string;
+  address: string;
+  note?: string;
+}
+
 export interface ShopInfo {
   name: string;
   slogan: string;
   address: string;
+  addresses?: ShopAddress[];
   hotline: string;
   email: string;
   opening_hours: string;
   copyright: string;
+}
+
+export function normalizeShopAddresses(shopInfo?: Partial<ShopInfo>): ShopAddress[] {
+  if (!shopInfo) {
+    return [];
+  }
+
+  if (Array.isArray(shopInfo.addresses) && shopInfo.addresses.length > 0) {
+    return shopInfo.addresses
+      .filter((entry) => entry && typeof entry.address === 'string' && entry.address.trim().length > 0)
+      .map((entry, index) => ({
+        id: entry.id || `branch-${index + 1}`,
+        label: entry.label || `Chi nhánh ${index + 1}`,
+        address: entry.address.trim(),
+        note: entry.note?.trim()
+      }));
+  }
+
+  const fallbackAddress = shopInfo.address?.trim();
+  if (!fallbackAddress) {
+    return [];
+  }
+
+  return [{
+    id: 'branch-1',
+    label: 'Chi nhánh 1',
+    address: fallbackAddress
+  }];
+}
+
+export function getPrimaryShopAddress(shopInfo?: Partial<ShopInfo>): string {
+  return normalizeShopAddresses(shopInfo)[0]?.address || shopInfo?.address || '';
 }
 
 export interface HeroConfig {
