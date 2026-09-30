@@ -4,7 +4,6 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Hero from '../components/landing/Hero.astro';
 import ProductGrid from '../components/products/ProductGrid.astro';
-import VideoSection from '../components/media/VideoSection.astro';
 import Commitments from '../components/landing/Commitments.astro';
 import Testimonials from '../components/landing/Testimonials.astro';
 import { db } from '../lib/store/db';
@@ -13,7 +12,6 @@ import { db } from '../lib/store/db';
 const settings = db.getSettings();
 const products = db.getPublicProducts();
 const occasions = db.getOccasions();
-const videos = db.getPublicVideos();
 const commitments = db.getCommitments();
 const testimonials = db.getPublicTestimonials();
 ---
@@ -28,9 +26,6 @@ const testimonials = db.getPublicTestimonials();
     occasions={occasions} 
     zaloConfig={settings.zalo_config} 
   />
-
-  <!-- Video & Stories Section (YouTube / TikTok Facade) -->
-  {videos.length > 0 && <VideoSection videos={videos} />}
 
   <!-- 4 Quality Commitments Section -->
   {commitments.length > 0 && <Commitments commitments={commitments} />}
