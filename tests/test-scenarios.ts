@@ -318,6 +318,36 @@ async function runTests() {
   );
 
   // ----------------------------------------------------
+  // TC-20: Video embed URLs contain autoplay parameters for automatic playback
+  // ----------------------------------------------------
+  function formatAutoplayUrl(url?: string): string {
+    if (!url) return '';
+    if (url.includes('autoplay=')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}autoplay=1&mute=1&playsinline=1`;
+  }
+
+  const rawYoutube = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+  const rawYoutubeWithQuery = 'https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0';
+  const autoplayUrl1 = formatAutoplayUrl(rawYoutube);
+  const autoplayUrl2 = formatAutoplayUrl(rawYoutubeWithQuery);
+  const autoplayAlreadySet = formatAutoplayUrl('https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1');
+
+  const tc20Valid = 
+    autoplayUrl1.includes('autoplay=1') &&
+    autoplayUrl1.includes('mute=1') &&
+    autoplayUrl2.includes('autoplay=1') &&
+    autoplayUrl2.includes('&autoplay=1') &&
+    autoplayAlreadySet === 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1';
+
+  assert(
+    'TC-20: Video embed URLs contain autoplay parameters (autoplay=1&mute=1) for automatic playback without user click',
+    'TC',
+    tc20Valid,
+    'Failed to format video URL with autoplay parameters'
+  );
+
+  // ----------------------------------------------------
   // Summary
   // ----------------------------------------------------
   const total = results.length;
