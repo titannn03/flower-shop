@@ -1,0 +1,40 @@
+---
+// src/pages/index.astro
+// Main Landing Page for Flower Shop
+import PublicLayout from '../layouts/PublicLayout.astro';
+import Hero from '../components/landing/Hero.astro';
+import ProductGrid from '../components/products/ProductGrid.astro';
+import VideoSection from '../components/media/VideoSection.astro';
+import Commitments from '../components/landing/Commitments.astro';
+import Testimonials from '../components/landing/Testimonials.astro';
+import { db } from '../lib/store/db';
+
+// SSR fetch latest settings & published content
+const settings = db.getSettings();
+const products = db.getPublicProducts();
+const occasions = db.getOccasions();
+const videos = db.getPublicVideos();
+const commitments = db.getCommitments();
+const testimonials = db.getPublicTestimonials();
+---
+
+<PublicLayout settings={settings}>
+  <!-- Hero Section -->
+  <Hero heroConfig={settings.hero_config} zaloConfig={settings.zalo_config} />
+
+  <!-- Featured Products Section with Occasion Filter -->
+  <ProductGrid 
+    products={products} 
+    occasions={occasions} 
+    zaloConfig={settings.zalo_config} 
+  />
+
+  <!-- Video & Stories Section (YouTube / TikTok Facade) -->
+  {videos.length > 0 && <VideoSection videos={videos} />}
+
+  <!-- 4 Quality Commitments Section -->
+  {commitments.length > 0 && <Commitments commitments={commitments} />}
+
+  <!-- Customer Testimonials & Reviews Section -->
+  {testimonials.length > 0 && <Testimonials testimonials={testimonials} />}
+</PublicLayout>
