@@ -348,6 +348,44 @@ async function runTests() {
   );
 
   // ----------------------------------------------------
+  // TC-21: Commitments Management & Content Update
+  // ----------------------------------------------------
+  const initialComs = db.getAllAdminCommitments();
+  const targetCom = initialComs[0];
+  const oldTitle = targetCom.title;
+  const oldDesc = targetCom.description;
+
+  const updatedCom = db.updateCommitment(targetCom.id, {
+    title: 'Hoa Tươi Cao Cấp Tuyển Chọn Loại 1',
+    description: 'Cam kết 100% hoa tươi loại 1 tuyển chọn kỹ lưỡng mỗi sáng sớm.',
+    icon_key: 'award',
+    sort_order: 1,
+    active: true
+  });
+
+  const checkCom = db.getAllAdminCommitments().find(c => c.id === targetCom.id);
+  assert(
+    'TC-21: Admin can update commitment title, description, icon, and sort order with persistence',
+    'TC',
+    Boolean(
+      updatedCom &&
+      checkCom?.title === 'Hoa Tươi Cao Cấp Tuyển Chọn Loại 1' &&
+      checkCom?.description === 'Cam kết 100% hoa tươi loại 1 tuyển chọn kỹ lưỡng mỗi sáng sớm.' &&
+      checkCom?.icon_key === 'award'
+    ),
+    'Failed to update commitment content'
+  );
+
+  // Restore original
+  db.updateCommitment(targetCom.id, {
+    title: oldTitle,
+    description: oldDesc,
+    icon_key: targetCom.icon_key,
+    sort_order: targetCom.sort_order,
+    active: targetCom.active
+  });
+
+  // ----------------------------------------------------
   // Summary
   // ----------------------------------------------------
   const total = results.length;
