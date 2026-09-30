@@ -11,14 +11,17 @@ interface Props {
   settings: SiteSettings;
   pageTitle?: string;
   pageDescription?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+  structuredDataExtra?: Record<string, any>;
 }
 
-const { settings, pageTitle, pageDescription } = Astro.props;
+const { settings, pageTitle, pageDescription, ogImage: customOgImage, canonicalUrl, structuredDataExtra } = Astro.props;
 
 const title = pageTitle || settings.seo_config.meta_title;
 const description = pageDescription || settings.seo_config.meta_description;
-const ogImage = settings.seo_config.og_image;
-const canonicalDomain = settings.seo_config.canonical_domain || 'https://flowervibes.vn';
+const ogImage = customOgImage || settings.seo_config.og_image;
+const canonicalDomain = canonicalUrl || settings.seo_config.canonical_domain || 'https://flowervibes.vn';
 
 // Structured Data (JSON-LD) for LocalBusiness / Florist (Section 11)
 const structuredData = {
@@ -69,6 +72,9 @@ const structuredData = {
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    {structuredDataExtra && (
+      <script type="application/ld+json" set:html={JSON.stringify(structuredDataExtra)} />
+    )}
   </head>
   <body class="bg-background text-textColor-primary antialiased selection:bg-accent selection:text-primary min-h-screen flex flex-col">
     <!-- Header -->

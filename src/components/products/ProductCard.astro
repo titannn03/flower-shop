@@ -40,19 +40,21 @@ const occasionSlugs = (product.occasions || []).map(o => o.slug).join(' ');
 >
   <div>
     <!-- Image Media Container with Carousel / Dots (FE-04) -->
-    <div class="relative overflow-hidden aspect-[4/5] bg-pink-50/50">
-      <!-- Main Image -->
-      <img
-        src={coverImage.secure_url}
-        alt={coverImage.alt_text || product.name}
-        class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-        loading="lazy"
-        width="600"
-        height="750"
-      />
+    <div class="relative overflow-hidden aspect-[4/5] bg-pink-50/50 group/img">
+      <!-- Main Image Clickable Link to Detail Page -->
+      <a href={`/products/${product.slug}`} class="block w-full h-full focus:outline-none" aria-label={`Xem chi tiết mẫu ${product.name}`}>
+        <img
+          src={coverImage.secure_url}
+          alt={coverImage.alt_text || product.name}
+          class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          width="600"
+          height="750"
+        />
+      </a>
 
       <!-- Badges -->
-      <div class="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+      <div class="absolute top-3 left-3 flex flex-col gap-1.5 items-start pointer-events-none">
         {product.featured && (
           <span class="bg-primary text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md">
             ★ Nổi bật
@@ -66,12 +68,26 @@ const occasionSlugs = (product.occasions || []).map(o => o.slug).join(' ');
       </div>
 
       <!-- Quick Delivery Badge -->
-      <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-semibold text-textColor-primary flex items-center gap-1 shadow-sm">
+      <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-semibold text-textColor-primary flex items-center gap-1 shadow-sm pointer-events-none">
         <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
         </svg>
         Giao 2H
       </div>
+
+      <!-- Quick View Button (Modal Trigger) -->
+      <button
+        type="button"
+        class="quick-view-btn absolute bottom-3 right-3 bg-white/95 hover:bg-white text-textColor-primary hover:text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 hover:shadow-lg focus:opacity-100"
+        data-slug={product.slug}
+        aria-label={`Xem nhanh mẫu ${product.name}`}
+      >
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        <span>Xem nhanh</span>
+      </button>
     </div>
 
     <!-- Product Info Details -->
@@ -87,10 +103,12 @@ const occasionSlugs = (product.occasions || []).map(o => o.slug).join(' ');
         </div>
       )}
 
-      <!-- Title -->
-      <h3 class="font-serif font-bold text-lg text-textColor-primary leading-snug group-hover:text-primary transition-colors">
-        {product.name}
-      </h3>
+      <!-- Title Link to Detail Page -->
+      <a href={`/products/${product.slug}`} class="block group/title">
+        <h3 class="font-serif font-bold text-lg text-textColor-primary leading-snug group-hover/title:text-primary group-hover:text-primary transition-colors">
+          {product.name}
+        </h3>
+      </a>
 
       <!-- Short Description -->
       {product.short_description && (
@@ -123,21 +141,35 @@ const occasionSlugs = (product.occasions || []).map(o => o.slug).join(' ');
       </span>
     </div>
 
-    <!-- CTA Button with Copy-to-Clipboard & Zalo trigger (FE-06 requirement) -->
-    <button
-      type="button"
-      class="product-cta-btn btn-pill-primary text-xs sm:text-sm py-2.5 px-4 shadow-sm"
-      data-product-name={product.name}
-      data-product-id={product.id}
-      data-product-slug={product.slug}
-      data-zalo-url={zaloConfig.url}
-      aria-label={`Đặt mua ${product.name} qua Zalo`}
-    >
-      <svg class="w-4 h-4 fill-current mr-1" viewBox="0 0 24 24">
-        <path d="M12 2C6.48 2 2 6.03 2 11c0 2.87 1.5 5.43 3.84 7.07-.17 1.05-.62 2.65-1.57 3.86 0 0 2.45-.3 4.25-1.54.48.07.97.11 1.48.11 5.52 0 10-4.03 10-9S17.52 2 12 2z"/>
-      </svg>
-      <span>Đặt Hoa</span>
-    </button>
+    <div class="flex items-center gap-2">
+      <!-- Detail Page Link Icon -->
+      <a
+        href={`/products/${product.slug}`}
+        class="p-2 rounded-full border border-primary/20 text-textColor-secondary hover:text-primary hover:bg-primary/5 transition-colors"
+        title="Xem trang chi tiết đầy đủ"
+        aria-label={`Xem trang chi tiết ${product.name}`}
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+
+      <!-- CTA Button with Copy-to-Clipboard & Zalo trigger (FE-06 requirement) -->
+      <button
+        type="button"
+        class="product-cta-btn btn-pill-primary text-xs sm:text-sm py-2.5 px-4 shadow-sm"
+        data-product-name={product.name}
+        data-product-id={product.id}
+        data-product-slug={product.slug}
+        data-zalo-url={zaloConfig.url}
+        aria-label={`Đặt mua ${product.name} qua Zalo`}
+      >
+        <svg class="w-4 h-4 fill-current mr-1" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.03 2 11c0 2.87 1.5 5.43 3.84 7.07-.17 1.05-.62 2.65-1.57 3.86 0 0 2.45-.3 4.25-1.54.48.07.97.11 1.48.11 5.52 0 10-4.03 10-9S17.52 2 12 2z"/>
+        </svg>
+        <span>Đặt Hoa</span>
+      </button>
+    </div>
   </div>
 </article>
 
@@ -178,6 +210,20 @@ const occasionSlugs = (product.occasions || []).map(o => o.slug).join(' ');
       setTimeout(() => {
         window.open(zaloUrl, '_blank', 'noopener,noreferrer');
       }, 700);
+    });
+  });
+
+  // Attach quick view click listeners
+  document.querySelectorAll('.quick-view-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const slug = (btn as HTMLElement).getAttribute('data-slug');
+      if (slug && (window as any).openProductDetailModal) {
+        (window as any).openProductDetailModal(slug);
+      } else if (slug) {
+        window.location.href = `/products/${slug}`;
+      }
     });
   });
 </script>

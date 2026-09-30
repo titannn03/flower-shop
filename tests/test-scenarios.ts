@@ -240,6 +240,29 @@ async function runTests() {
   });
 
   // ----------------------------------------------------
+  // TC-15 & TC-16: Product Detail View & Slug Retrieval
+  // ----------------------------------------------------
+  const firstProd = products[0];
+  const prodBySlug = db.getProductBySlug(firstProd.slug);
+  assert(
+    'TC-15: Product detail retrieved by slug with complete fields',
+    'TC',
+    !!prodBySlug &&
+      prodBySlug.id === firstProd.id &&
+      typeof prodBySlug.description === 'string' &&
+      Array.isArray(prodBySlug.images),
+    'Failed to retrieve product detail by slug'
+  );
+
+  const nonExistent = db.getProductBySlug('non-existent-flower-slug-xyz');
+  assert(
+    'TC-16: Non-existent product slug returns undefined (handled by 404)',
+    'TC',
+    nonExistent === undefined,
+    'Non-existent product slug should return undefined'
+  );
+
+  // ----------------------------------------------------
   // Summary
   // ----------------------------------------------------
   const total = results.length;

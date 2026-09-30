@@ -1,7 +1,7 @@
 // src/lib/analytics/tracker.ts
 // Custom analytics tracker conforming to Section 14 (Privacy-friendly, no PII)
 
-export type CtaLocation = 'hero' | 'product_card' | 'floating' | 'footer' | 'testimonial' | 'nav';
+export type CtaLocation = 'hero' | 'product_card' | 'floating' | 'footer' | 'testimonial' | 'nav' | 'product_detail' | 'product_modal';
 
 export interface AnalyticsEventMap {
   view_product: { product_id: string; slug: string; position?: number };

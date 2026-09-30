@@ -1,8 +1,8 @@
 ---
-// src/components/products/ProductGrid.astro
 import type { Product, Occasion, ZaloConfig } from '../../types';
 import ProductCard from './ProductCard.astro';
 import OccasionFilter from './OccasionFilter.astro';
+import ProductDetailModal from './ProductDetailModal.astro';
 
 interface Props {
   products: Product[];
@@ -62,6 +62,9 @@ const { products, occasions, zaloConfig } = Astro.props;
     </div>
 
   </div>
+
+  <!-- Quick-View Product Detail Modal -->
+  <ProductDetailModal zaloConfig={zaloConfig} />
 </section>
 
 <script>

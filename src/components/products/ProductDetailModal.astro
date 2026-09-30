@@ -1,0 +1,289 @@
+---
+// src/components/products/ProductDetailModal.astro
+import type { ZaloConfig } from '../../types';
+
+interface Props {
+  zaloConfig: ZaloConfig;
+}
+
+const { zaloConfig } = Astro.props;
+---
+
+<div
+  id="product-detail-modal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-product-title"
+>
+  <!-- Modal Dialog Card -->
+  <div 
+    id="modal-card" 
+    class="relative w-full max-w-3xl bg-background-card rounded-3xl shadow-2xl border border-primary/20 overflow-hidden transform scale-95 transition-all duration-300 max-h-[90vh] flex flex-col md:flex-row"
+  >
+    <!-- Close Button -->
+    <button
+      id="modal-close-btn"
+      type="button"
+      class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-textColor-primary flex items-center justify-center shadow-md hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+      aria-label="Đóng cửa sổ xem chi tiết"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Modal Left: Media -->
+    <div class="md:w-1/2 relative bg-pink-50/50 aspect-[4/5] md:aspect-auto flex-shrink-0 overflow-hidden">
+      <img
+        id="modal-image"
+        src=""
+        alt="Ảnh sản phẩm"
+        class="w-full h-full object-cover object-center"
+      />
+      <div id="modal-badge-container" class="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
+        <!-- Badges will be injected dynamically -->
+      </div>
+    </div>
+
+    <!-- Modal Right: Content & Ordering -->
+    <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto">
+      <div class="space-y-4">
+        <!-- Occasion chips -->
+        <div id="modal-occasions" class="flex flex-wrap gap-1.5"></div>
+
+        <!-- Title -->
+        <div>
+          <h3 id="modal-product-title" class="font-serif font-bold text-xl sm:text-2xl text-textColor-primary leading-snug">
+            <!-- Product Name -->
+          </h3>
+          <p id="modal-product-sku" class="text-xs text-textColor-muted font-mono mt-1"></p>
+        </div>
+
+        <!-- Pricing -->
+        <div class="p-3.5 rounded-2xl bg-pink-50/60 border border-primary/10">
+          <div class="flex items-baseline gap-3 flex-wrap">
+            <span id="modal-price" class="text-2xl font-serif font-bold text-primary"></span>
+            <span id="modal-compare-price" class="text-sm text-textColor-muted line-through font-medium hidden"></span>
+          </div>
+          <p id="modal-savings" class="text-xs text-emerald-700 font-semibold mt-1 hidden"></p>
+        </div>
+
+        <!-- Flower Components -->
+        <div id="modal-components-box" class="p-3 rounded-xl bg-accent/20 border border-primary/10 text-xs text-textColor-primary hidden">
+          <span class="font-bold text-primary block mb-0.5">🌸 Thành phần hoa:</span>
+          <span id="modal-components"></span>
+        </div>
+
+        <!-- Short Description -->
+        <p id="modal-description" class="text-xs sm:text-sm text-textColor-secondary leading-relaxed line-clamp-4">
+          <!-- Short Description -->
+        </p>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="pt-6 border-t border-primary/10 space-y-3 mt-4">
+        <!-- Zalo CTA -->
+        <button
+          id="modal-zalo-btn"
+          type="button"
+          class="w-full btn-pill-primary py-3 px-4 text-sm font-bold shadow-md justify-center flex items-center gap-2 group"
+          data-zalo-url={zaloConfig.url}
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.03 2 11c0 2.87 1.5 5.43 3.84 7.07-.17 1.05-.62 2.65-1.57 3.86 0 0 2.45-.3 4.25-1.54.48.07.97.11 1.48.11 5.52 0 10-4.03 10-9S17.52 2 12 2z"/>
+          </svg>
+          <span>Nhắn Zalo Mẫu Hoa Này</span>
+        </button>
+
+        <!-- Full Detail Page Link -->
+        <a
+          id="modal-full-detail-link"
+          href="#"
+          class="block text-center text-xs text-textColor-secondary hover:text-primary transition-colors underline font-medium"
+        >
+          Xem toàn bộ ảnh & chi tiết bài viết →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { trackEvent } from '../../lib/analytics/tracker';
+
+  const modal = document.getElementById('product-detail-modal');
+  const modalCard = document.getElementById('modal-card');
+  const closeBtn = document.getElementById('modal-close-btn');
+
+  const modalImg = document.getElementById('modal-image') as HTMLImageElement;
+  const modalTitle = document.getElementById('modal-product-title');
+  const modalSku = document.getElementById('modal-product-sku');
+  const modalPrice = document.getElementById('modal-price');
+  const modalComparePrice = document.getElementById('modal-compare-price');
+  const modalSavings = document.getElementById('modal-savings');
+  const modalOccasions = document.getElementById('modal-occasions');
+  const modalComponentsBox = document.getElementById('modal-components-box');
+  const modalComponents = document.getElementById('modal-components');
+  const modalDesc = document.getElementById('modal-description');
+  const modalBadges = document.getElementById('modal-badge-container');
+  const modalZaloBtn = document.getElementById('modal-zalo-btn') as HTMLButtonElement;
+  const modalFullDetailLink = document.getElementById('modal-full-detail-link') as HTMLAnchorElement;
+
+  let currentProductData: any = null;
+
+  function formatVND(amount: number) {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0
+    }).format(amount).replace('₫', '').trim() + ' ₫';
+  }
+
+  function openModal(product: any) {
+    if (!modal || !modalCard) return;
+    currentProductData = product;
+
+    // Populate data
+    const coverUrl = product.images?.[0]?.secure_url || product.image_url || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80';
+    if (modalImg) modalImg.src = coverUrl;
+    if (modalTitle) modalTitle.textContent = product.name;
+    if (modalSku) modalSku.textContent = product.sku ? `Mã: ${product.sku}` : '';
+    if (modalPrice) modalPrice.textContent = formatVND(product.price);
+
+    // Compare at price
+    if (product.compare_at_price && product.compare_at_price > product.price) {
+      if (modalComparePrice) {
+        modalComparePrice.textContent = formatVND(product.compare_at_price);
+        modalComparePrice.classList.remove('hidden');
+      }
+      if (modalSavings) {
+        const diff = product.compare_at_price - product.price;
+        modalSavings.textContent = `Tiết kiệm ${formatVND(diff)}`;
+        modalSavings.classList.remove('hidden');
+      }
+    } else {
+      if (modalComparePrice) modalComparePrice.classList.add('hidden');
+      if (modalSavings) modalSavings.classList.add('hidden');
+    }
+
+    // Flower components
+    if (product.flower_components) {
+      if (modalComponents) modalComponents.textContent = product.flower_components;
+      if (modalComponentsBox) modalComponentsBox.classList.remove('hidden');
+    } else {
+      if (modalComponentsBox) modalComponentsBox.classList.add('hidden');
+    }
+
+    // Description
+    if (modalDesc) {
+      modalDesc.textContent = product.short_description || product.description?.replace(/<[^>]*>?/gm, '') || '';
+    }
+
+    // Occasion chips
+    if (modalOccasions) {
+      modalOccasions.innerHTML = '';
+      if (product.occasions && Array.isArray(product.occasions)) {
+        product.occasions.forEach((occ: any) => {
+          const chip = document.createElement('span');
+          chip.className = 'text-[11px] font-semibold text-primary bg-accent/40 px-2.5 py-0.5 rounded-full';
+          chip.textContent = occ.name;
+          modalOccasions.appendChild(chip);
+        });
+      }
+    }
+
+    // Badges
+    if (modalBadges) {
+      modalBadges.innerHTML = '';
+      if (product.featured) {
+        const badge = document.createElement('span');
+        badge.className = 'bg-primary text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md';
+        badge.textContent = '★ Nổi bật';
+        modalBadges.appendChild(badge);
+      }
+    }
+
+    // Detail page link
+    if (modalFullDetailLink && product.slug) {
+      modalFullDetailLink.href = `/products/${product.slug}`;
+    }
+
+    // Show modal
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
+    modalCard.classList.remove('scale-95');
+    modalCard.classList.add('scale-100');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    if (!modal || !modalCard) return;
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modalCard.classList.remove('scale-100');
+    modalCard.classList.add('scale-95');
+    document.body.style.overflow = '';
+    currentProductData = null;
+  }
+
+  // Close triggers
+  closeBtn?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Zalo CTA in Modal
+  modalZaloBtn?.addEventListener('click', async () => {
+    if (!currentProductData) return;
+    const zaloUrl = modalZaloBtn.getAttribute('data-zalo-url') || 'https://zalo.me';
+    const skuText = currentProductData.sku ? ` (Mã: ${currentProductData.sku})` : '';
+    const message = `Tư vấn giúp mình mẫu hoa: ${currentProductData.name}${skuText}`;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(message);
+      }
+    } catch (err) {
+      console.warn('Clipboard failed:', err);
+    }
+
+    if ((window as any).showToast) {
+      (window as any).showToast('Đã copy tên mẫu hoa, hãy dán vào ô chat Zalo để shop tư vấn ngay nhé!', 4500);
+    }
+
+    trackEvent('click_zalo', {
+      cta_location: 'product_modal',
+      product_id: currentProductData.id || currentProductData.slug,
+      page_path: window.location.pathname
+    });
+
+    setTimeout(() => {
+      window.open(zaloUrl, '_blank', 'noopener,noreferrer');
+    }, 700);
+  });
+
+  // Expose global method to open modal
+  (window as any).openProductDetailModal = async (slugOrProduct: string | any) => {
+    if (typeof slugOrProduct === 'object') {
+      openModal(slugOrProduct);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/public/products/${slugOrProduct}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        openModal(data.data);
+      } else {
+        // Fallback: navigate directly to detail page
+        window.location.href = `/products/${slugOrProduct}`;
+      }
+    } catch (e) {
+      window.location.href = `/products/${slugOrProduct}`;
+    }
+  };
+</script>
