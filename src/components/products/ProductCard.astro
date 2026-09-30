@@ -65,11 +65,6 @@ const occasionSlugs = (product.occasions || []).map(o => o.slug).join(' ');
             -{discountPercent}%
           </span>
         )}
-        {product.images?.some(img => img.media_type === 'video' || Boolean(img.video_embed_url)) && (
-          <span class="bg-black/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
-            <span class="text-rose-400">▶</span> Video
-          </span>
-        )}
       </div>
 
       <!-- Quick Delivery Badge -->

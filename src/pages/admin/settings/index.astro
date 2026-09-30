@@ -22,9 +22,6 @@ const commitments = db.getAllAdminCommitments();
           <h2 class="text-base font-serif font-bold text-neutral-900">
             1. Cấu hình Kênh Chuyển Đổi Zalo Toàn Cục
           </h2>
-          <p class="text-xs text-neutral-500">
-            Quy tắc BR-02: Toàn bộ nút CTA trên Hero, Sản phẩm, Floating, Footer đều đọc cấu hình này để chuyển hướng.
-          </p>
         </div>
       </div>
 
@@ -43,7 +40,6 @@ const commitments = db.getAllAdminCommitments();
             class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary focus:outline-none text-sm font-mono"
             placeholder="https://zalo.me/0901234567"
           />
-          <p class="text-[11px] text-neutral-400 mt-1">Phải có tiền tố <code class="font-mono text-primary">https://</code> để đảm bảo an toàn (Section 10.1)</p>
         </div>
 
         <!-- Hotline for Zalo -->
@@ -183,10 +179,10 @@ const commitments = db.getAllAdminCommitments();
       </div>
     </div>
 
-    <!-- 4. SEO & Social Sharing (Section 11) -->
+    <!-- 4. SEO & Social Sharing -->
     <div class="bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 shadow-sm space-y-5">
       <h2 class="text-base font-serif font-bold text-neutral-900 border-b border-neutral-100 pb-3">
-        4. Cấu hình SEO & Chia sẻ Mạng Xã Hội (Section 11)
+        4. Cấu hình SEO & Chia sẻ Mạng Xã Hội
       </h2>
 
       <div class="space-y-4">
@@ -203,21 +199,6 @@ const commitments = db.getAllAdminCommitments();
           </label>
           <textarea id="seo-desc" name="seo_desc" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary text-sm">{settings.seo_config.meta_description}</textarea>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="seo-domain" class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
-              Canonical Domain
-            </label>
-            <input type="url" id="seo-domain" name="seo_domain" value={settings.seo_config.canonical_domain} class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary text-sm" />
-          </div>
-          <div>
-            <label for="seo-og-image" class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
-              Ảnh xem trước Open Graph (OG Image URL)
-            </label>
-            <input type="url" id="seo-og-image" name="seo_og_image" value={settings.seo_config.og_image} class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary text-sm" />
-          </div>
-        </div>
       </div>
     </div>
 
@@ -226,7 +207,7 @@ const commitments = db.getAllAdminCommitments();
       <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
         <div>
           <h2 class="text-base font-serif font-bold text-neutral-900">
-            5. Quản lý 4 Cam Kết Vàng Về Dịch Vụ
+            5. Quản lý Cam Kết Vàng Về Dịch Vụ
           </h2>
           <p class="text-xs text-neutral-500 mt-0.5">
             Tùy chỉnh tiêu đề, mô tả, biểu tượng và trạng thái hiển thị của các cam kết dịch vụ

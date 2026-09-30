@@ -16,11 +16,10 @@ const { zaloConfig, shopInfo } = Astro.props;
       
       <!-- Brand Logo & Name -->
       <a href="/" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-1">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white shadow-md transform group-hover:scale-105 transition-transform">
-          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21a9 9 0 01-9-9c0-4.97 4.03-9 9-9s9 4.03 9 9a9 9 0 01-9 9zm0 0v-6m-4-3a4 4 0 118 0 4 4 0 01-8 0z" />
-          </svg>
+        <div class="w-10 h-10 md:w-14 md:h-14 rounded-full bg-stone-100 flex items-center justify-center shadow-lg border border-white/20 transform group-hover:scale-110 transition-transform p-1">
+          <img src="/logo.png" alt="Tiệm Hoa An Khánh" class="w-full h-full object-contain" />
         </div>
+
         <div>
           <span class="block text-xl font-serif font-bold text-textColor-primary tracking-wide group-hover:text-primary transition-colors">
             {shopInfo.name || 'FLOWER VIBES'}
@@ -95,7 +94,7 @@ const { zaloConfig, shopInfo } = Astro.props;
       🎬 Video cắm hoa & Stories
     </a>
     <a href="/#cam-ket" class="mobile-nav-link block px-4 py-3 rounded-xl text-base font-medium text-textColor-secondary hover:text-primary hover:bg-white/80">
-      ✨ 4 Cam kết dịch vụ
+      ✨ Cam kết dịch vụ
     </a>
     <a href="/#danh-gia" class="mobile-nav-link block px-4 py-3 rounded-xl text-base font-medium text-textColor-secondary hover:text-primary hover:bg-white/80">
       ⭐ Khách hàng đánh giá

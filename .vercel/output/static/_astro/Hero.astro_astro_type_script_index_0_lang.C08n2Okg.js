@@ -1,1 +1,0 @@
-import{t as a}from"./tracker.Bp8s150x.js";const t=document.getElementById("hero-zalo-cta");t&&t.addEventListener("click",()=>{a("click_zalo",{cta_location:"hero",page_path:window.location.pathname})});

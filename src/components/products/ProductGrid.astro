@@ -121,4 +121,10 @@ const { products, occasions, zaloConfig } = Astro.props;
       applyFilter('all');
     });
   }
+
+  // Auto-apply filter if URL contains ?occasion=slug
+  const urlParamOccasion = new URLSearchParams(window.location.search).get('occasion');
+  if (urlParamOccasion) {
+    applyFilter(urlParamOccasion);
+  }
 </script>

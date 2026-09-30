@@ -1,1 +1,0 @@
-import{t as a}from"./tracker.Bp8s150x.js";const t=document.getElementById("floating-zalo-btn");t&&t.addEventListener("click",()=>{a("click_zalo",{cta_location:"floating",page_path:window.location.pathname})});

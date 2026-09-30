@@ -394,6 +394,50 @@ async function runTests() {
   });
 
   // ----------------------------------------------------
+  // TC-22: Occasions Management & Public Filtering Integration
+  // ----------------------------------------------------
+  const createdOcc = db.createOccasion({
+    name: 'Ngày Của Mẹ',
+    slug: 'ngay-cua-me-test',
+    sort_order: 99,
+    active: true
+  });
+
+  const publicOccasionsWithNew = db.getOccasions();
+  const hasNewOccasionInPublic = publicOccasionsWithNew.some(o => o.slug === 'ngay-cua-me-test');
+
+  // Test toggling active to false
+  db.updateOccasion(createdOcc.id, { active: false });
+  const publicOccasionsAfterDeactivate = db.getOccasions();
+  const hiddenFromPublic = !publicOccasionsAfterDeactivate.some(o => o.slug === 'ngay-cua-me-test');
+
+  // Test updating name
+  db.updateOccasion(createdOcc.id, { name: 'Ngày Của Mẹ Yêu Thương', active: true });
+  const recheckedOcc = db.getOccasionById(createdOcc.id);
+
+  // Test system protection on 'all'
+  const cannotDeleteAll = db.deleteOccasion('occ-1').success === false;
+
+  // Test deletion of custom occasion
+  const deletedCustom = db.deleteOccasion(createdOcc.id).success === true;
+  const afterDeletePublic = !db.getOccasions().some(o => o.id === createdOcc.id);
+
+  assert(
+    'TC-22: Occasions CRUD, active toggles, and public filter synchronization',
+    'TC',
+    Boolean(
+      createdOcc &&
+      hasNewOccasionInPublic &&
+      hiddenFromPublic &&
+      recheckedOcc?.name === 'Ngày Của Mẹ Yêu Thương' &&
+      cannotDeleteAll &&
+      deletedCustom &&
+      afterDeletePublic
+    ),
+    'Occasion management failed verification'
+  );
+
+  // ----------------------------------------------------
   // Summary
   // ----------------------------------------------------
   const total = results.length;

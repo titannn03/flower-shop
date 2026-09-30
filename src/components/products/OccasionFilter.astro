@@ -8,10 +8,15 @@ interface Props {
 }
 
 const { occasions, activeSlug = 'all' } = Astro.props;
+
+// Ensure 'all' (Tất cả) is always placed first, followed by other active occasions
+const allItem = occasions.find(o => o.slug === 'all') || { id: 'occ-all', name: 'Tất cả', slug: 'all', sort_order: 0, active: true };
+const otherItems = occasions.filter(o => o.slug !== 'all');
+const displayOccasions = [allItem, ...otherItems];
 ---
 
 <div class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-  {occasions.map((occ) => {
+  {displayOccasions.map((occ) => {
     const isActive = occ.slug === activeSlug;
     return (
       <button

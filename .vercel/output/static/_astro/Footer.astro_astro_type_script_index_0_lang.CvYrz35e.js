@@ -1,1 +1,0 @@
-import{t as o}from"./tracker.Bp8s150x.js";const t=document.getElementById("footer-zalo-cta");t&&t.addEventListener("click",()=>{o("click_zalo",{cta_location:"footer",page_path:window.location.pathname})});

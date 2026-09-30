@@ -1,0 +1,426 @@
+---
+// src/pages/admin/occasions/index.astro
+// Admin Occasions Management Page
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { db } from '../../../lib/store/db';
+
+const occasions = db.getAllAdminOccasions().map(occ => ({
+  ...occ,
+  product_count: db.getOccasionProductCount(occ.slug)
+}));
+---
+
+<AdminLayout 
+  title="Quản lý Phân loại Dịp tặng" 
+  subtitle="Thêm, chỉnh sửa, sắp xếp thứ tự và bật/tắt các danh mục dịp tặng hiển thị trên website"
+>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Left Column: Add / Edit Form -->
+    <div class="lg:col-span-5">
+      <div class="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-5 sticky top-6">
+        <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
+          <h2 id="form-heading" class="text-base font-serif font-bold text-neutral-900">
+            Thêm Dịp Tặng Mới
+          </h2>
+          <span id="edit-badge" class="hidden px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
+            Đang sửa
+          </span>
+        </div>
+
+        <form id="occasion-form" class="space-y-4">
+          <input type="hidden" id="occasion-id" name="id" value="" />
+
+          <!-- Name -->
+          <div>
+            <label for="occasion-name" class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
+              Tên dịp tặng <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="occasion-name" 
+              name="name" 
+              required 
+              class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+              placeholder="Ví dụ: Ngày Của Mẹ, Lễ Tình Nhân, Khai Trương..."
+            />
+          </div>
+
+          <!-- Slug -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="occasion-slug" class="block text-xs font-bold uppercase tracking-wider text-neutral-700">
+                Mã định danh (Slug) <span class="text-rose-500">*</span>
+              </label>
+              <button 
+                type="button" 
+                id="btn-auto-slug" 
+                class="text-[11px] text-primary hover:underline font-medium"
+              >
+                Tự tạo từ tên
+              </button>
+            </div>
+            <input 
+              type="text" 
+              id="occasion-slug" 
+              name="slug" 
+              required 
+              class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary focus:outline-none text-sm font-mono text-xs"
+              placeholder="vi-du: ngay-cua-me"
+            />
+            <p class="text-[11px] text-neutral-400 mt-1">Dùng trong URL lọc (ví dụ: /?occasion=sinh-nhat)</p>
+          </div>
+
+          <!-- Sort Order & Active -->
+          <div class="grid grid-cols-2 gap-4 pt-1">
+            <div>
+              <label for="occasion-order" class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
+                Thứ tự hiển thị
+              </label>
+              <input 
+                type="number" 
+                id="occasion-order" 
+                name="sort_order" 
+                value={occasions.length} 
+                min="0"
+                max="99"
+                class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+              />
+            </div>
+
+            <div class="flex flex-col justify-end pb-1.5">
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-neutral-800">
+                <input 
+                  type="checkbox" 
+                  id="occasion-active" 
+                  name="active" 
+                  checked 
+                  class="w-4 h-4 rounded text-primary focus:ring-primary"
+                />
+                <span>Kích hoạt hiển thị</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="pt-3 flex items-center gap-3">
+            <button 
+              type="submit" 
+              id="submit-btn" 
+              class="flex-1 btn-pill-primary py-2.5 text-sm font-semibold justify-center shadow-md"
+            >
+              Lưu Dịp Tặng
+            </button>
+            <button 
+              type="button" 
+              id="cancel-edit-btn" 
+              class="hidden px-4 py-2.5 rounded-full border border-neutral-300 text-neutral-600 hover:bg-neutral-100 text-xs font-semibold"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Occasions List -->
+    <div class="lg:col-span-7">
+      <div class="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-neutral-100 pb-3">
+          <div>
+            <h2 class="text-base font-serif font-bold text-neutral-900">
+              Danh Sách Phân Loại ({occasions.length})
+            </h2>
+            <p class="text-xs text-neutral-500 mt-0.5">
+              Phân loại đang hoạt động sẽ tự động xuất hiện ở bộ lọc trang chủ
+            </p>
+          </div>
+        </div>
+
+        <div class="divide-y divide-neutral-100" id="occasions-list">
+          {occasions.map((occ) => (
+            <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-neutral-50/60 p-2.5 rounded-xl transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-accent/60 text-primary flex items-center justify-center font-bold text-xs flex-shrink-0">
+                  #{occ.sort_order}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-neutral-900">{occ.name}</span>
+                    {occ.slug === 'all' && (
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-neutral-100 text-neutral-600 border border-neutral-200">
+                        Mặc định
+                      </span>
+                    )}
+                    {occ.active ? (
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Hiển thị
+                      </span>
+                    ) : (
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-neutral-100 text-neutral-500">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-400"></span> Tạm ẩn
+                      </span>
+                    )}
+                  </div>
+                  <div class="flex items-center gap-3 text-xs text-neutral-500 mt-1">
+                    <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-[11px] text-neutral-600 font-mono">
+                      {occ.slug}
+                    </code>
+                    <span>•</span>
+                    <span>{occ.product_count} sản phẩm</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center gap-2 self-end sm:self-center">
+                <!-- Toggle Active -->
+                <button
+                  type="button"
+                  class="toggle-active-btn px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors"
+                  class:list={[
+                    occ.active 
+                      ? 'border-emerald-200 text-emerald-700 hover:bg-emerald-50' 
+                      : 'border-neutral-300 text-neutral-600 hover:bg-neutral-100'
+                  ]}
+                  data-id={occ.id}
+                  data-active={occ.active ? 'true' : 'false'}
+                  title={occ.active ? 'Bấm để ẩn phân loại này' : 'Bấm để hiển thị phân loại này'}
+                >
+                  {occ.active ? 'Đang Bật' : 'Đang Tắt'}
+                </button>
+
+                <!-- Edit Button -->
+                <button
+                  type="button"
+                  class="edit-occasion-btn px-2.5 py-1.5 rounded-lg border border-neutral-300 text-neutral-700 hover:bg-neutral-100 text-xs font-medium transition-colors"
+                  data-id={occ.id}
+                  data-name={occ.name}
+                  data-slug={occ.slug}
+                  data-order={occ.sort_order}
+                  data-active={occ.active ? 'true' : 'false'}
+                >
+                  Sửa
+                </button>
+
+                <!-- Delete Button (Except 'all') -->
+                {occ.slug !== 'all' ? (
+                  <button
+                    type="button"
+                    class="delete-occasion-btn px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-medium transition-colors"
+                    data-id={occ.id}
+                    data-name={occ.name}
+                    data-count={occ.product_count}
+                  >
+                    Xóa
+                  </button>
+                ) : (
+                  <span class="w-10"></span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</AdminLayout>
+
+<script>
+  // Helper slugify
+  function slugify(text: string): string {
+    return text
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9 -]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
+
+  const form = document.getElementById('occasion-form') as HTMLFormElement;
+  const formHeading = document.getElementById('form-heading') as HTMLElement;
+  const editBadge = document.getElementById('edit-badge') as HTMLElement;
+  const cancelBtn = document.getElementById('cancel-edit-btn') as HTMLButtonElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+  const idInput = document.getElementById('occasion-id') as HTMLInputElement;
+  const nameInput = document.getElementById('occasion-name') as HTMLInputElement;
+  const slugInput = document.getElementById('occasion-slug') as HTMLInputElement;
+  const orderInput = document.getElementById('occasion-order') as HTMLInputElement;
+  const activeInput = document.getElementById('occasion-active') as HTMLInputElement;
+  const autoSlugBtn = document.getElementById('btn-auto-slug') as HTMLButtonElement;
+
+  let isCustomSlug = false;
+
+  // Auto slugify when typing name (if adding new)
+  if (nameInput && slugInput) {
+    nameInput.addEventListener('input', () => {
+      if (!idInput.value && !isCustomSlug) {
+        slugInput.value = slugify(nameInput.value);
+      }
+    });
+
+    slugInput.addEventListener('input', () => {
+      isCustomSlug = true;
+    });
+  }
+
+  if (autoSlugBtn && nameInput && slugInput) {
+    autoSlugBtn.addEventListener('click', () => {
+      slugInput.value = slugify(nameInput.value);
+      isCustomSlug = false;
+    });
+  }
+
+  function resetForm() {
+    form.reset();
+    idInput.value = '';
+    formHeading.textContent = 'Thêm Dịp Tặng Mới';
+    submitBtn.textContent = 'Lưu Dịp Tặng';
+    editBadge.classList.add('hidden');
+    cancelBtn.classList.add('hidden');
+    isCustomSlug = false;
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', resetForm);
+  }
+
+  // Handle Edit button click
+  document.querySelectorAll('.edit-occasion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const b = btn as HTMLButtonElement;
+      const id = b.getAttribute('data-id') || '';
+      const name = b.getAttribute('data-name') || '';
+      const slug = b.getAttribute('data-slug') || '';
+      const order = b.getAttribute('data-order') || '0';
+      const active = b.getAttribute('data-active') === 'true';
+
+      idInput.value = id;
+      nameInput.value = name;
+      slugInput.value = slug;
+      orderInput.value = order;
+      activeInput.checked = active;
+
+      formHeading.textContent = 'Chỉnh Sửa Dịp Tặng';
+      submitBtn.textContent = 'Cập Nhật Dịp Tặng';
+      editBadge.classList.remove('hidden');
+      cancelBtn.classList.remove('hidden');
+      isCustomSlug = true;
+
+      // Scroll to form on mobile
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nameInput.focus();
+    });
+  });
+
+  // Handle Form Submit
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Đang lưu...';
+
+      const isEdit = Boolean(idInput.value);
+      const method = isEdit ? 'PATCH' : 'POST';
+      const payload: any = {
+        name: nameInput.value.trim(),
+        slug: slugInput.value.trim(),
+        sort_order: parseInt(orderInput.value, 10) || 0,
+        active: activeInput.checked
+      };
+      if (isEdit) {
+        payload.id = idInput.value;
+      }
+
+      try {
+        const res = await fetch('/api/admin/occasions', {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert(data.error?.message || 'Có lỗi xảy ra khi lưu dịp tặng');
+        }
+      } catch (err) {
+        alert('Lỗi kết nối máy chủ');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = isEdit ? 'Cập Nhật Dịp Tặng' : 'Lưu Dịp Tặng';
+      }
+    });
+  }
+
+  // Handle Toggle Active
+  document.querySelectorAll('.toggle-active-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const b = e.currentTarget as HTMLButtonElement;
+      const id = b.getAttribute('data-id');
+      const currentActive = b.getAttribute('data-active') === 'true';
+      if (!id) return;
+
+      b.disabled = true;
+      try {
+        const res = await fetch('/api/admin/occasions', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, active: !currentActive })
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert(data.error?.message || 'Lỗi cập nhật trạng thái');
+        }
+      } catch (err) {
+        alert('Lỗi kết nối');
+      } finally {
+        b.disabled = false;
+      }
+    });
+  });
+
+  // Handle Delete
+  document.querySelectorAll('.delete-occasion-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const b = e.currentTarget as HTMLButtonElement;
+      const id = b.getAttribute('data-id');
+      const name = b.getAttribute('data-name');
+      const count = parseInt(b.getAttribute('data-count') || '0', 10);
+      if (!id) return;
+
+      let confirmMsg = `Bạn có chắc chắn muốn xóa phân loại "${name}"?`;
+      if (count > 0) {
+        confirmMsg = `Phân loại "${name}" đang được gắn cho ${count} sản phẩm. Xóa phân loại sẽ gỡ dịp tặng này khỏi các sản phẩm đó. Bạn vẫn muốn tiếp tục?`;
+      }
+
+      if (!confirm(confirmMsg)) return;
+
+      b.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/occasions?id=${id}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert(data.error?.message || 'Lỗi khi xóa phân loại');
+        }
+      } catch (err) {
+        alert('Lỗi kết nối máy chủ');
+      } finally {
+        b.disabled = false;
+      }
+    });
+  });
+</script>

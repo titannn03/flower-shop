@@ -140,6 +140,106 @@ class DataStore {
     return this.data.occasions.filter(o => o.active).sort((a, b) => a.sort_order - b.sort_order);
   }
 
+  public getAllAdminOccasions(): Occasion[] {
+    return [...this.data.occasions].sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  public getOccasionById(id: string): Occasion | undefined {
+    return this.data.occasions.find(o => o.id === id);
+  }
+
+  public getOccasionBySlug(slug: string): Occasion | undefined {
+    return this.data.occasions.find(o => o.slug === slug);
+  }
+
+  public getOccasionProductCount(slug: string): number {
+    if (slug === 'all') {
+      return this.data.products.filter(p => !p.deleted_at).length;
+    }
+    return this.data.products.filter(p => !p.deleted_at && p.occasions?.some(o => o.slug === slug)).length;
+  }
+
+  public createOccasion(data: Omit<Occasion, 'id'>): Occasion {
+    const newOccasion: Occasion = {
+      id: `occ-${Date.now()}`,
+      name: data.name.trim(),
+      slug: data.slug.trim(),
+      sort_order: Number(data.sort_order) || 0,
+      active: data.active ?? true
+    };
+    this.data.occasions.push(newOccasion);
+    this.persist();
+    this.logAudit('CREATE', 'occasion', newOccasion.id, newOccasion);
+    return newOccasion;
+  }
+
+  public updateOccasion(id: string, updates: Partial<Occasion>): Occasion | null {
+    const idx = this.data.occasions.findIndex(o => o.id === id);
+    if (idx === -1) return null;
+
+    const oldSlug = this.data.occasions[idx].slug;
+    const newSlug = updates.slug?.trim();
+
+    this.data.occasions[idx] = { 
+      ...this.data.occasions[idx], 
+      ...updates,
+      ...(updates.name && { name: updates.name.trim() }),
+      ...(newSlug && { slug: newSlug }),
+      ...(typeof updates.sort_order === 'number' && { sort_order: updates.sort_order }),
+      ...(typeof updates.active === 'boolean' && { active: updates.active })
+    };
+
+    // If slug or name updated, sync products that contain this occasion
+    if (newSlug && newSlug !== oldSlug) {
+      for (const prod of this.data.products) {
+        if (prod.occasions) {
+          for (const o of prod.occasions) {
+            if (o.slug === oldSlug || o.id === id) {
+              o.slug = newSlug;
+              if (updates.name) o.name = updates.name.trim();
+            }
+          }
+        }
+      }
+    } else if (updates.name) {
+      for (const prod of this.data.products) {
+        if (prod.occasions) {
+          for (const o of prod.occasions) {
+            if (o.id === id || o.slug === this.data.occasions[idx].slug) {
+              o.name = updates.name.trim();
+            }
+          }
+        }
+      }
+    }
+
+    this.persist();
+    this.logAudit('UPDATE', 'occasion', id, updates);
+    return this.data.occasions[idx];
+  }
+
+  public deleteOccasion(id: string): { success: boolean; message?: string } {
+    const occasion = this.data.occasions.find(o => o.id === id);
+    if (!occasion) {
+      return { success: false, message: 'Không tìm thấy dịp tặng' };
+    }
+    if (occasion.slug === 'all') {
+      return { success: false, message: 'Không thể xóa phân loại mặc định (Tất cả)' };
+    }
+
+    // Remove occasion from products
+    for (const prod of this.data.products) {
+      if (prod.occasions) {
+        prod.occasions = prod.occasions.filter(o => o.id !== id && o.slug !== occasion.slug);
+      }
+    }
+
+    this.data.occasions = this.data.occasions.filter(o => o.id !== id);
+    this.persist();
+    this.logAudit('DELETE', 'occasion', id, { slug: occasion.slug, name: occasion.name });
+    return { success: true };
+  }
+
   // --- COMMITMENTS ---
   public getCommitments(): Commitment[] {
     return this.data.commitments.filter(c => c.active).sort((a, b) => a.sort_order - b.sort_order);
