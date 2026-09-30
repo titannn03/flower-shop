@@ -128,19 +128,34 @@ const pageDesc = product.short_description || `Đặt mua ${product.name} hoa t�
         
         <!-- Left: Image Gallery (5 cols on lg) -->
         <div class="lg:col-span-6 space-y-4">
-          <!-- Main Display Image Container -->
+          <!-- Main Display Image & Video Container -->
           <div class="relative rounded-3xl overflow-hidden glass-card aspect-[4/5] bg-pink-50/50 shadow-lg border border-primary/10">
+            <!-- Image display -->
             <img
               id="main-product-image"
               src={coverImage.secure_url}
               alt={coverImage.alt_text || product.name}
-              class="w-full h-full object-cover object-center transition-all duration-300"
+              class={`w-full h-full object-cover object-center transition-all duration-300 ${coverImage.media_type === 'video' ? 'hidden' : 'block'}`}
               width="800"
               height="1000"
             />
 
+            <!-- Embedded Video Frame container -->
+            <div 
+              id="main-video-container" 
+              class={`w-full h-full bg-black flex items-center justify-center ${coverImage.media_type === 'video' ? 'block' : 'hidden'}`}
+            >
+              <iframe
+                id="main-video-iframe"
+                src={coverImage.media_type === 'video' ? (coverImage.video_embed_url || '') : ''}
+                class="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
+            </div>
+
             <!-- Badges -->
-            <div class="absolute top-4 left-4 flex flex-col gap-2 items-start">
+            <div class="absolute top-4 left-4 flex flex-col gap-2 items-start pointer-events-none">
               {product.featured && (
                 <span class="bg-primary text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-md">
                   ★ Mẫu hoa nổi bật
@@ -154,35 +169,47 @@ const pageDesc = product.short_description || `Đặt mua ${product.name} hoa t�
             </div>
 
             <!-- Fast Delivery Tag -->
-            <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold text-textColor-primary flex items-center gap-1.5 shadow-md">
+            <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold text-textColor-primary flex items-center gap-1.5 shadow-md pointer-events-none">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Giao hỏa tốc 60 - 120 phút
             </div>
           </div>
 
-          <!-- Thumbnails Row (if more than 1 image) -->
+          <!-- Thumbnails Row (if more than 1 image or video) -->
           {images.length > 1 && (
             <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none" id="product-thumbnails">
-              {images.map((img, index) => (
-                <button
-                  type="button"
-                  class={`thumbnail-btn flex-shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-200 ${
-                    index === 0 ? 'border-primary ring-2 ring-primary/30 shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
-                  }`}
-                  data-img-url={img.secure_url}
-                  data-img-alt={img.alt_text || product.name}
-                  aria-label={`Xem ảnh ${index + 1}`}
-                >
-                  <img
-                    src={img.secure_url}
-                    alt={img.alt_text || `${product.name} ${index + 1}`}
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                    width="120"
-                    height="150"
-                  />
-                </button>
-              ))}
+              {images.map((img, index) => {
+                const isVideo = img.media_type === 'video' || Boolean(img.video_embed_url);
+                return (
+                  <button
+                    type="button"
+                    class={`thumbnail-btn relative flex-shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-200 ${
+                      index === 0 ? 'border-primary ring-2 ring-primary/30 shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                    data-is-video={isVideo ? 'true' : 'false'}
+                    data-img-url={img.secure_url}
+                    data-embed-url={img.video_embed_url || ''}
+                    data-img-alt={img.alt_text || product.name}
+                    aria-label={`Xem ${isVideo ? 'video' : 'ảnh'} ${index + 1}`}
+                  >
+                    <img
+                      src={img.secure_url}
+                      alt={img.alt_text || `${product.name} ${index + 1}`}
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                      width="120"
+                      height="150"
+                    />
+                    {isVideo && (
+                      <div class="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+                        <div class="w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs shadow-md">
+                          ▶
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -409,22 +436,39 @@ const pageDesc = product.short_description || `Đặt mua ${product.name} hoa t�
 <script>
   import { trackEvent } from '../../lib/analytics/tracker';
 
-  // 1. Thumbnail Click Switcher
+  // 1. Thumbnail Click Switcher (Supports both Images and Videos)
   const mainImg = document.getElementById('main-product-image') as HTMLImageElement | null;
+  const videoContainer = document.getElementById('main-video-container') as HTMLElement | null;
+  const videoIframe = document.getElementById('main-video-iframe') as HTMLIFrameElement | null;
   const thumbnailBtns = document.querySelectorAll<HTMLButtonElement>('.thumbnail-btn');
 
   thumbnailBtns.forEach(btn => {
     btn.addEventListener('click', () => {
+      const isVideo = btn.getAttribute('data-is-video') === 'true';
       const targetUrl = btn.getAttribute('data-img-url');
+      const targetEmbed = btn.getAttribute('data-embed-url');
       const targetAlt = btn.getAttribute('data-img-alt');
 
-      if (mainImg && targetUrl) {
-        mainImg.style.opacity = '0.5';
-        setTimeout(() => {
-          mainImg.src = targetUrl;
-          if (targetAlt) mainImg.alt = targetAlt;
-          mainImg.style.opacity = '1';
-        }, 150);
+      if (isVideo && targetEmbed) {
+        if (mainImg) mainImg.classList.add('hidden');
+        if (videoContainer && videoIframe) {
+          videoContainer.classList.remove('hidden');
+          videoIframe.src = targetEmbed;
+        }
+      } else {
+        if (videoContainer && videoIframe) {
+          videoContainer.classList.add('hidden');
+          videoIframe.src = '';
+        }
+        if (mainImg && targetUrl) {
+          mainImg.classList.remove('hidden');
+          mainImg.style.opacity = '0.5';
+          setTimeout(() => {
+            mainImg.src = targetUrl;
+            if (targetAlt) mainImg.alt = targetAlt;
+            mainImg.style.opacity = '1';
+          }, 150);
+        }
       }
 
       // Update active thumbnail borders

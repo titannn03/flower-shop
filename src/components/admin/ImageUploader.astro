@@ -1,103 +1,346 @@
 ---
 // src/components/admin/ImageUploader.astro
 // Conforms to Section D.7: Max 5MB block + Browser client-side auto-resize max width 1920px
+// Supports adding both Images (file upload) and Videos (YouTube / TikTok embeds)
+import type { ProductImage } from '../../types';
+
 interface Props {
   id?: string;
   label?: string;
   coverOnly?: boolean;
+  initialImages?: ProductImage[];
 }
 
-const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = false } = Astro.props;
+const { 
+  id = 'image-uploader', 
+  label = 'Hình ảnh & Video sản phẩm (Ảnh bìa & Gallery)', 
+  coverOnly = false,
+  initialImages = [] 
+} = Astro.props;
 ---
 
-<div class="space-y-3" id={id}>
-  <label class="block text-sm font-semibold text-neutral-800">
-    {label}
-    <span class="text-xs font-normal text-neutral-500 block mt-0.5">
-      Tối đa 5MB. Tự động nén và resize bề ngang về tối đa 1920px bằng JS ngay trong trình duyệt.
-    </span>
-  </label>
-
-  <!-- Upload drop area -->
-  <div 
-    class="uploader-dropzone border-2 border-dashed border-neutral-300 hover:border-primary rounded-2xl p-6 text-center cursor-pointer transition-colors bg-white hover:bg-pink-50/20"
-  >
-    <input 
-      type="file" 
-      class="uploader-input hidden" 
-      accept="image/jpeg,image/png,image/webp" 
-      multiple={!coverOnly} 
-    />
-    
-    <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
-      <div class="w-12 h-12 rounded-full bg-accent/60 text-primary flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <p class="text-sm font-medium text-neutral-700">
-        <span class="text-primary hover:underline">Bấm để chọn ảnh</span> hoặc kéo thả vào đây
-      </p>
-      <p class="text-xs text-neutral-400">JPG, PNG, WEBP (Tối đa 5MB / file)</p>
+<div class="space-y-4" id={id}>
+  <div class="flex items-center justify-between flex-wrap gap-2">
+    <div>
+      <label class="block text-sm font-semibold text-neutral-800">
+        {label}
+      </label>
+      <span class="text-xs text-neutral-500 block mt-0.5">
+        Hỗ trợ tải ảnh (JPG/PNG/WebP, tự động nén max 1920px) và nhúng video thực tế từ TikTok / YouTube.
+      </span>
     </div>
   </div>
 
-  <!-- Progress / Status indicator -->
-  <div class="uploader-status hidden text-xs font-medium text-primary flex items-center gap-2">
-    <svg class="animate-spin h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-    <span class="status-text">Đang nén và tải ảnh lên...</span>
-  </div>
+  <!-- Tabs / Toggle between Upload Image and Embed Video -->
+  <div class="border border-neutral-200 rounded-2xl p-4 bg-neutral-50/60 space-y-4">
+    <!-- Media Mode Selector -->
+    <div class="flex items-center gap-2 border-b border-neutral-200 pb-3">
+      <button
+        type="button"
+        class="media-tab-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-white text-primary shadow-sm border border-neutral-200"
+        data-tab="image"
+      >
+        📷 Tải ảnh từ máy tính
+      </button>
+      <button
+        type="button"
+        class="media-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-neutral-600 hover:text-neutral-900 transition-all"
+        data-tab="video"
+      >
+        🎬 Nhúng Video (TikTok / YouTube)
+      </button>
+    </div>
 
-  <!-- Preview list of uploaded images -->
-  <div class="uploader-preview-list grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-    <!-- Populated by JS -->
+    <!-- 1. Image Upload Drop Area -->
+    <div class="media-panel-image">
+      <div 
+        class="uploader-dropzone border-2 border-dashed border-neutral-300 hover:border-primary rounded-xl p-6 text-center cursor-pointer transition-colors bg-white hover:bg-pink-50/20"
+      >
+        <input 
+          type="file" 
+          class="uploader-input hidden" 
+          accept="image/jpeg,image/png,image/webp" 
+          multiple={!coverOnly} 
+        />
+        
+        <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+          <div class="w-10 h-10 rounded-full bg-accent/60 text-primary flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-neutral-700">
+            <span class="text-primary hover:underline">Bấm để chọn ảnh</span> hoặc kéo thả file vào đây
+          </p>
+          <p class="text-xs text-neutral-400">JPG, PNG, WEBP (Tối đa 5MB/file - Tự động nén bằng HTML5 Canvas)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Video Embed Input Area -->
+    <div class="media-panel-video hidden space-y-3">
+      <div class="flex flex-col sm:flex-row gap-2">
+        <div class="relative flex-1">
+          <input
+            type="url"
+            class="video-url-input w-full px-4 py-2.5 rounded-xl border border-neutral-300 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+            placeholder="Dán link video YouTube (Shorts/Watch) hoặc TikTok..."
+          />
+        </div>
+        <button
+          type="button"
+          class="add-video-btn btn-pill-primary text-xs sm:text-sm py-2 px-4 whitespace-nowrap flex items-center justify-center gap-1.5"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Thêm vào Gallery</span>
+        </button>
+      </div>
+
+      <p class="text-xs text-neutral-500">
+        Hỗ trợ định dạng: <code class="bg-neutral-200/70 px-1 py-0.5 rounded text-[11px]">https://youtube.com/watch?v=...</code>, <code class="bg-neutral-200/70 px-1 py-0.5 rounded text-[11px]">https://youtu.be/...</code> hoặc <code class="bg-neutral-200/70 px-1 py-0.5 rounded text-[11px]">https://tiktok.com/@.../video/...</code>
+      </p>
+    </div>
+
+    <!-- Progress / Status indicator -->
+    <div class="uploader-status hidden text-xs font-medium text-primary flex items-center gap-2">
+      <svg class="animate-spin h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="status-text">Đang xử lý media...</span>
+    </div>
+
+    <!-- Initial Data script for pre-population in Edit mode -->
+    <script type="application/json" class="initial-media-data" set:html={JSON.stringify(initialImages)} />
+
+    <!-- Preview list of images and videos -->
+    <div>
+      <div class="flex items-center justify-between text-xs text-neutral-500 mb-2">
+        <span class="font-medium">Danh sách media đã thêm (chọn nút tròn để đặt làm Ảnh/Video bìa):</span>
+        <span class="media-count-badge font-mono">0 media</span>
+      </div>
+
+      <div class="uploader-preview-list grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-  // Image compression & upload logic conforming to Section D.7
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const MAX_WIDTH = 1920; // 1920px max width
 
-  function setupUploader() {
-    const containers = document.querySelectorAll('[id^="image-uploader"]');
+  // Video URL parser matching YouTube and TikTok formats
+  function parseVideoLink(url: string) {
+    const trimmed = url.trim();
+
+    // 1. YouTube
+    const ytMatch = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))([\w-]{11})/);
+    if (ytMatch && ytMatch[1]) {
+      const id = ytMatch[1];
+      return {
+        provider: 'youtube' as const,
+        externalId: id,
+        embedUrl: `https://www.youtube.com/embed/${id}`,
+        thumbnailUrl: `https://img.youtube.com/vi/${id}/hqdefault.jpg`
+      };
+    }
+
+    // 2. TikTok
+    const ttMatch = trimmed.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/)(\d+)/);
+    if (ttMatch && ttMatch[1]) {
+      const id = ttMatch[1];
+      return {
+        provider: 'tiktok' as const,
+        externalId: id,
+        embedUrl: `https://www.tiktok.com/embed/v2/${id}`,
+        thumbnailUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80'
+      };
+    }
+
+    return null;
+  }
+
+  function setupImageUploader() {
+    const containers = document.querySelectorAll<HTMLElement>('[id^="image-uploader"]');
 
     containers.forEach(container => {
-      const dropzone = container.querySelector('.uploader-dropzone') as HTMLElement;
-      const input = container.querySelector('.uploader-input') as HTMLInputElement;
-      const statusEl = container.querySelector('.uploader-status') as HTMLElement;
-      const statusText = container.querySelector('.status-text') as HTMLElement;
-      const previewList = container.querySelector('.uploader-preview-list') as HTMLElement;
+      const tabBtns = container.querySelectorAll<HTMLButtonElement>('.media-tab-btn');
+      const panelImage = container.querySelector<HTMLElement>('.media-panel-image');
+      const panelVideo = container.querySelector<HTMLElement>('.media-panel-video');
 
-      if (!dropzone || !input || !previewList) return;
+      const dropzone = container.querySelector<HTMLElement>('.uploader-dropzone');
+      const input = container.querySelector<HTMLInputElement>('.uploader-input');
+      const statusEl = container.querySelector<HTMLElement>('.uploader-status');
+      const statusText = container.querySelector<HTMLElement>('.status-text');
+      const previewList = container.querySelector<HTMLElement>('.uploader-preview-list');
+      const countBadge = container.querySelector<HTMLElement>('.media-count-badge');
 
-      dropzone.addEventListener('click', () => input.click());
+      const videoInput = container.querySelector<HTMLInputElement>('.video-url-input');
+      const addVideoBtn = container.querySelector<HTMLButtonElement>('.add-video-btn');
 
-      dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('border-primary', 'bg-pink-50/40');
+      if (!previewList) return;
+
+      // Tab switcher
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.getAttribute('data-tab');
+          tabBtns.forEach(b => {
+            b.classList.remove('active', 'bg-white', 'text-primary', 'shadow-sm', 'border', 'border-neutral-200');
+            b.classList.add('text-neutral-600');
+          });
+          btn.classList.add('active', 'bg-white', 'text-primary', 'shadow-sm', 'border', 'border-neutral-200');
+          btn.classList.remove('text-neutral-600');
+
+          if (tab === 'video') {
+            panelImage?.classList.add('hidden');
+            panelVideo?.classList.remove('hidden');
+            videoInput?.focus();
+          } else {
+            panelVideo?.classList.add('hidden');
+            panelImage?.classList.remove('hidden');
+          }
+        });
       });
 
-      dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('border-primary', 'bg-pink-50/40');
-      });
+      // Update media count badge
+      function updateCount() {
+        if (!countBadge || !previewList) return;
+        const total = previewList.querySelectorAll('.media-item').length;
+        countBadge.textContent = `${total} media`;
+      }
 
-      dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('border-primary', 'bg-pink-50/40');
-        if (e.dataTransfer && e.dataTransfer.files) {
-          handleFiles(e.dataTransfer.files);
+      // Add Card DOM element
+      function addMediaCard(data: {
+        secure_url: string;
+        media_type?: 'image' | 'video';
+        video_provider?: string;
+        video_url?: string;
+        video_embed_url?: string;
+        public_id?: string;
+        width?: number;
+        height?: number;
+        is_cover?: boolean;
+      }) {
+        if (!previewList) return;
+
+        const isVideo = data.media_type === 'video' || Boolean(data.video_embed_url);
+        const card = document.createElement('div');
+        card.className = 'relative group rounded-xl overflow-hidden border border-neutral-200 aspect-[4/5] bg-neutral-100 media-item';
+
+        card.setAttribute('data-secure-url', data.secure_url || '');
+        card.setAttribute('data-media-type', isVideo ? 'video' : 'image');
+        if (data.public_id) card.setAttribute('data-public-id', data.public_id);
+        if (data.width) card.setAttribute('data-width', String(data.width));
+        if (data.height) card.setAttribute('data-height', String(data.height));
+        if (data.video_provider) card.setAttribute('data-video-provider', data.video_provider);
+        if (data.video_url) card.setAttribute('data-video-url', data.video_url);
+        if (data.video_embed_url) card.setAttribute('data-video-embed-url', data.video_embed_url);
+
+        const currentItems = previewList.querySelectorAll('.media-item');
+        const isCover = data.is_cover !== undefined ? data.is_cover : currentItems.length === 0;
+
+        card.innerHTML = `
+          <img src="${data.secure_url}" class="w-full h-full object-cover" />
+          
+          ${isVideo ? `
+            <div class="absolute top-2 left-2 bg-black/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
+              <span class="text-rose-500">▶</span>
+              <span class="capitalize">${data.video_provider || 'Video'}</span>
+            </div>
+          ` : ''}
+
+          <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
+            <div class="flex justify-between items-center">
+              <label class="text-[10px] text-white flex items-center gap-1 cursor-pointer bg-black/60 px-1.5 py-0.5 rounded hover:bg-black">
+                <input type="radio" name="is_cover" value="${data.secure_url}" ${isCover ? 'checked' : ''} class="cover-radio" />
+                <span>Ảnh bìa</span>
+              </label>
+              <button type="button" class="remove-btn text-white hover:text-rose-400 bg-black/60 p-1 rounded hover:bg-black/90">
+                ✕
+              </button>
+            </div>
+            
+            <div class="flex items-center justify-between text-[10px] text-white/90">
+              <span>${isVideo ? 'Frame nhúng' : `${data.width || 800}x${data.height || 1000}`}</span>
+              ${data.video_embed_url ? `
+                <a href="${data.video_url || data.video_embed_url}" target="_blank" rel="noopener" class="underline text-amber-300">
+                  Xem video ↗
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.remove-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          card.remove();
+          updateCount();
+        });
+
+        previewList.appendChild(card);
+        updateCount();
+      }
+
+      // Add Video Handler
+      addVideoBtn?.addEventListener('click', () => {
+        if (!videoInput) return;
+        const url = videoInput.value.trim();
+        if (!url) {
+          alert('Vui lòng dán đường link video YouTube hoặc TikTok');
+          return;
         }
+
+        const parsed = parseVideoLink(url);
+        if (!parsed) {
+          alert('Không nhận diện được link video! Vui lòng nhập link YouTube hoặc TikTok hợp lệ.');
+          return;
+        }
+
+        addMediaCard({
+          secure_url: parsed.thumbnailUrl,
+          media_type: 'video',
+          video_provider: parsed.provider,
+          video_url: url,
+          video_embed_url: parsed.embedUrl,
+          width: parsed.provider === 'youtube' ? 1280 : 720,
+          height: parsed.provider === 'youtube' ? 720 : 1280,
+          is_cover: false
+        });
+
+        videoInput.value = '';
       });
 
-      input.addEventListener('change', () => {
-        if (input.files) {
-          handleFiles(input.files);
-        }
-      });
+      // Dropzone & File selection
+      if (dropzone && input) {
+        dropzone.addEventListener('click', () => input.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropzone.classList.add('border-primary', 'bg-pink-50/40');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+          dropzone.classList.remove('border-primary', 'bg-pink-50/40');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('border-primary', 'bg-pink-50/40');
+          if (e.dataTransfer && e.dataTransfer.files) {
+            handleFiles(e.dataTransfer.files);
+          }
+        });
+
+        input.addEventListener('change', () => {
+          if (input.files) {
+            handleFiles(input.files);
+          }
+        });
+      }
 
       async function handleFiles(files: FileList) {
         for (let i = 0; i < files.length; i++) {
@@ -105,7 +348,7 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
 
           // 1. Strict 5MB size limit check (Section D.7 requirement)
           if (file.size > MAX_FILE_SIZE) {
-            alert(`File "${file.name}" vượt quá giới hạn 5MB (${(file.size / 1024 / 1024).toFixed(2)} MB). Hệ thống đã chặn chọn file này!`);
+            alert(`File "${file.name}" vượt quá giới hạn 5MB (${(file.size / 1024 / 1024).toFixed(2)} MB). Hệ thống đã chặn file này!`);
             continue;
           }
 
@@ -117,7 +360,7 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
 
           if (statusEl && statusText) {
             statusEl.classList.remove('hidden');
-            statusText.textContent = `Đang xử lý & nén ảnh "${file.name}"...`;
+            statusText.textContent = `Đang nén & tối ưu ảnh "${file.name}"...`;
           }
 
           try {
@@ -125,7 +368,7 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
             const processedBlob = await resizeImageClientSide(file, MAX_WIDTH);
 
             // 4. Upload processed blob
-            statusText.textContent = `Đang tải ảnh "${file.name}" lên máy chủ...`;
+            if (statusText) statusText.textContent = `Đang tải ảnh "${file.name}" lên Cloudinary...`;
             const formData = new FormData();
             formData.append('file', processedBlob, file.name);
 
@@ -136,7 +379,14 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
 
             const result = await res.json();
             if (result.success && result.data) {
-              addPreviewCard(result.data, previewList);
+              addMediaCard({
+                secure_url: result.data.secure_url,
+                media_type: 'image',
+                public_id: result.data.public_id,
+                width: result.data.width,
+                height: result.data.height,
+                is_cover: previewList?.querySelectorAll('.media-item').length === 0
+              });
             } else {
               alert(result.error?.message || 'Lỗi khi tải ảnh');
             }
@@ -145,6 +395,31 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
           } finally {
             if (statusEl) statusEl.classList.add('hidden');
           }
+        }
+      }
+
+      // Pre-populate initial media data (for Edit Product mode)
+      const initialScript = container.querySelector<HTMLScriptElement>('.initial-media-data');
+      if (initialScript && initialScript.textContent) {
+        try {
+          const items = JSON.parse(initialScript.textContent);
+          if (Array.isArray(items)) {
+            items.forEach((item: any) => {
+              addMediaCard({
+                secure_url: item.secure_url,
+                media_type: item.media_type || (item.video_embed_url ? 'video' : 'image'),
+                video_provider: item.video_provider,
+                video_url: item.video_url,
+                video_embed_url: item.video_embed_url,
+                public_id: item.cloudinary_public_id,
+                width: item.width,
+                height: item.height,
+                is_cover: item.is_cover
+              });
+            });
+          }
+        } catch (e) {
+          console.warn('Could not parse initial images:', e);
         }
       }
     });
@@ -160,7 +435,6 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
           let targetWidth = img.width;
           let targetHeight = img.height;
 
-          // Resize if wider than maxWidth
           if (targetWidth > maxWidth) {
             targetHeight = Math.round((targetHeight * maxWidth) / targetWidth);
             targetWidth = maxWidth;
@@ -171,12 +445,11 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
           canvas.height = targetHeight;
           const ctx = canvas.getContext('2d');
           if (!ctx) {
-            return resolve(file); // fallback to original file if canvas not supported
+            return resolve(file);
           }
 
           ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-          // Export as webp or jpeg with 0.88 quality
           const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
           canvas.toBlob((blob) => {
             if (blob) {
@@ -194,43 +467,36 @@ const { id = 'image-uploader', label = 'Tải ảnh sản phẩm', coverOnly = f
     });
   }
 
-  // Append thumbnail card to preview list
-  function addPreviewCard(data: any, container: HTMLElement) {
-    const card = document.createElement('div');
-    card.className = 'relative group rounded-xl overflow-hidden border border-neutral-200 aspect-[4/5] bg-neutral-100 image-item';
-    card.setAttribute('data-secure-url', data.secure_url);
-    card.setAttribute('data-public-id', data.public_id);
-    card.setAttribute('data-width', data.width);
-    card.setAttribute('data-height', data.height);
+  // Global helper for form submit scripts to extract all media items
+  (window as any).getMediaFromUploader = (uploaderContainerId: string = 'image-uploader') => {
+    const container = document.getElementById(uploaderContainerId);
+    if (!container) return [];
 
-    const isFirst = container.querySelectorAll('.image-item').length === 0;
+    const items = container.querySelectorAll<HTMLElement>('.media-item');
+    const result: any[] = [];
 
-    card.innerHTML = `
-      <img src="${data.secure_url}" class="w-full h-full object-cover" />
-      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
-        <div class="flex justify-between items-center">
-          <label class="text-[10px] text-white flex items-center gap-1 cursor-pointer bg-black/50 px-1.5 py-0.5 rounded">
-            <input type="radio" name="is_cover" value="${data.secure_url}" ${isFirst ? 'checked' : ''} class="cover-radio" />
-            <span>Ảnh bìa</span>
-          </label>
-          <button type="button" class="remove-btn text-white hover:text-rose-400 bg-black/50 p-1 rounded">
-            ✕
-          </button>
-        </div>
-        <div class="text-[10px] text-white/90">
-          <span>${data.width}x${data.height}</span>
-        </div>
-      </div>
-    `;
+    items.forEach((item, index) => {
+      const radio = item.querySelector<HTMLInputElement>('.cover-radio');
+      const isCover = radio ? radio.checked : index === 0;
 
-    card.querySelector('.remove-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      card.remove();
+      result.push({
+        id: `img-${Date.now()}-${index}`,
+        media_type: item.getAttribute('data-media-type') || 'image',
+        video_provider: item.getAttribute('data-video-provider') || undefined,
+        video_url: item.getAttribute('data-video-url') || undefined,
+        video_embed_url: item.getAttribute('data-video-embed-url') || undefined,
+        cloudinary_public_id: item.getAttribute('data-public-id') || undefined,
+        secure_url: item.getAttribute('data-secure-url') || '',
+        width: Number(item.getAttribute('data-width')) || 800,
+        height: Number(item.getAttribute('data-height')) || 1000,
+        is_cover: isCover,
+        sort_order: index
+      });
     });
 
-    container.appendChild(card);
-  }
+    return result;
+  };
 
-  // Initialize
-  setupUploader();
+  // Run on page load
+  setupImageUploader();
 </script>

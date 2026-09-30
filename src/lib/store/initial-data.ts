@@ -43,6 +43,19 @@ export const initialProducts: Product[] = [
         height: 1000,
         is_cover: false,
         sort_order: 1
+      },
+      {
+        id: 'vid-1-1',
+        media_type: 'video',
+        video_provider: 'youtube',
+        video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        video_embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        secure_url: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        alt_text: 'Video quay thực tế bó hoa hồng Ohara',
+        width: 1280,
+        height: 720,
+        is_cover: false,
+        sort_order: 2
       }
     ],
     occasions: [

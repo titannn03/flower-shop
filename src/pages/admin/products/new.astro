@@ -271,24 +271,30 @@ const occasions = db.getOccasions();
       submitBtn.disabled = true;
       submitBtn.textContent = 'Đang lưu sản phẩm...';
 
-      // Collect uploaded images from the preview list
-      const imageItems = document.querySelectorAll('.image-item');
-      const selectedCover = (document.querySelector('input[name="is_cover"]:checked') as HTMLInputElement)?.value;
-
-      const images: any[] = [];
-      imageItems.forEach((item, index) => {
-        const secureUrl = item.getAttribute('data-secure-url') || '';
-        const publicId = item.getAttribute('data-public-id') || '';
-        const isCover = selectedCover ? secureUrl === selectedCover : index === 0;
-
-        images.push({
-          id: `img-${Date.now()}-${index}`,
-          secure_url: secureUrl,
-          cloudinary_public_id: publicId,
-          is_cover: isCover,
-          sort_order: index
+      // Collect uploaded media (images & videos) from the preview list
+      let images: any[] = [];
+      if ((window as any).getMediaFromUploader) {
+        images = (window as any).getMediaFromUploader('image-uploader');
+      }
+      if (images.length === 0) {
+        const mediaItems = document.querySelectorAll('.media-item, .image-item');
+        const selectedCover = (document.querySelector('input[name="is_cover"]:checked') as HTMLInputElement)?.value;
+        mediaItems.forEach((item, index) => {
+          const secureUrl = item.getAttribute('data-secure-url') || '';
+          const isCover = selectedCover ? secureUrl === selectedCover : index === 0;
+          images.push({
+            id: `img-${Date.now()}-${index}`,
+            media_type: item.getAttribute('data-media-type') || 'image',
+            video_provider: item.getAttribute('data-video-provider') || undefined,
+            video_url: item.getAttribute('data-video-url') || undefined,
+            video_embed_url: item.getAttribute('data-video-embed-url') || undefined,
+            secure_url: secureUrl,
+            cloudinary_public_id: item.getAttribute('data-public-id') || undefined,
+            is_cover: isCover,
+            sort_order: index
+          });
         });
-      });
+      }
 
       // Collect selected occasions
       const checkedOccasions = document.querySelectorAll('input[name="occasions"]:checked');

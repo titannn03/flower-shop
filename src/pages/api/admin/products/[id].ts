@@ -107,3 +107,33 @@ export const DELETE: APIRoute = async ({ params }) => {
     );
   }
 };
+
+export const GET: APIRoute = async ({ params }) => {
+  try {
+    const { id } = params;
+    if (!id) {
+      return new Response(
+        JSON.stringify({ success: false, error: { code: 'BAD_REQUEST', message: 'Thiếu ID sản phẩm' } }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const product = db.getProductById(id);
+    if (!product) {
+      return new Response(
+        JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm' } }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, data: product }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ success: false, error: { code: 'SERVER_ERROR', message: err.message || 'Lỗi lấy thông tin sản phẩm' } }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+};

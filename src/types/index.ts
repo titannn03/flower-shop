@@ -3,8 +3,14 @@
 
 export type ProductStatus = 'draft' | 'published' | 'hidden';
 
+export type MediaItemType = 'image' | 'video';
+
 export interface ProductImage {
   id: string;
+  media_type?: MediaItemType;
+  video_provider?: VideoProvider;
+  video_url?: string;
+  video_embed_url?: string;
   product_id?: string;
   cloudinary_public_id?: string;
   secure_url: string;

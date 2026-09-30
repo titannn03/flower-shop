@@ -33,7 +33,7 @@ const { zaloConfig } = Astro.props;
       </svg>
     </button>
 
-    <!-- Modal Left: Media -->
+    <!-- Modal Left: Media (Image & Video) -->
     <div class="md:w-1/2 relative bg-pink-50/50 aspect-[4/5] md:aspect-auto flex-shrink-0 overflow-hidden">
       <img
         id="modal-image"
@@ -41,8 +41,37 @@ const { zaloConfig } = Astro.props;
         alt="Ảnh sản phẩm"
         class="w-full h-full object-cover object-center"
       />
-      <div id="modal-badge-container" class="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
+      <!-- Video Frame Container -->
+      <div id="modal-video-container" class="hidden w-full h-full bg-black flex items-center justify-center">
+        <iframe
+          id="modal-video-iframe"
+          src=""
+          class="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+
+      <div id="modal-badge-container" class="absolute top-4 left-4 flex flex-col gap-1.5 items-start pointer-events-none">
         <!-- Badges will be injected dynamically -->
+      </div>
+
+      <!-- Media mode toggle buttons (Photo / Video) -->
+      <div id="modal-media-toggle" class="absolute bottom-3 right-3 flex gap-1 z-10 hidden">
+        <button
+          type="button"
+          id="modal-toggle-photo"
+          class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-white text-primary shadow-md hover:bg-neutral-50 transition-colors"
+        >
+          📷 Ảnh
+        </button>
+        <button
+          type="button"
+          id="modal-toggle-video"
+          class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-600 text-white shadow-md hover:bg-rose-700 transition-colors flex items-center gap-1"
+        >
+          <span>▶ Video</span>
+        </button>
       </div>
     </div>
 
@@ -117,6 +146,12 @@ const { zaloConfig } = Astro.props;
   const closeBtn = document.getElementById('modal-close-btn');
 
   const modalImg = document.getElementById('modal-image') as HTMLImageElement;
+  const modalVideoContainer = document.getElementById('modal-video-container');
+  const modalVideoIframe = document.getElementById('modal-video-iframe') as HTMLIFrameElement;
+  const modalMediaToggle = document.getElementById('modal-media-toggle');
+  const togglePhotoBtn = document.getElementById('modal-toggle-photo');
+  const toggleVideoBtn = document.getElementById('modal-toggle-video');
+
   const modalTitle = document.getElementById('modal-product-title');
   const modalSku = document.getElementById('modal-product-sku');
   const modalPrice = document.getElementById('modal-price');
@@ -140,9 +175,24 @@ const { zaloConfig } = Astro.props;
     }).format(amount).replace('₫', '').trim() + ' ₫';
   }
 
+  function showPhoto() {
+    if (modalImg) modalImg.classList.remove('hidden');
+    if (modalVideoContainer) modalVideoContainer.classList.add('hidden');
+    if (modalVideoIframe) modalVideoIframe.src = '';
+  }
+
+  function showVideo(embedUrl: string) {
+    if (modalImg) modalImg.classList.add('hidden');
+    if (modalVideoContainer) modalVideoContainer.classList.remove('hidden');
+    if (modalVideoIframe) modalVideoIframe.src = embedUrl;
+  }
+
   function openModal(product: any) {
     if (!modal || !modalCard) return;
     currentProductData = product;
+
+    // Reset media
+    showPhoto();
 
     // Populate data
     const coverUrl = product.images?.[0]?.secure_url || product.image_url || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80';
@@ -150,6 +200,16 @@ const { zaloConfig } = Astro.props;
     if (modalTitle) modalTitle.textContent = product.name;
     if (modalSku) modalSku.textContent = product.sku ? `Mã: ${product.sku}` : '';
     if (modalPrice) modalPrice.textContent = formatVND(product.price);
+
+    // Video check in product images
+    const videoMedia = (product.images || []).find((img: any) => img.media_type === 'video' || Boolean(img.video_embed_url));
+    if (videoMedia && videoMedia.video_embed_url && modalMediaToggle) {
+      modalMediaToggle.classList.remove('hidden');
+      togglePhotoBtn?.addEventListener('click', showPhoto);
+      toggleVideoBtn?.addEventListener('click', () => showVideo(videoMedia.video_embed_url));
+    } else if (modalMediaToggle) {
+      modalMediaToggle.classList.add('hidden');
+    }
 
     // Compare at price
     if (product.compare_at_price && product.compare_at_price > product.price) {
@@ -219,6 +279,8 @@ const { zaloConfig } = Astro.props;
 
   function closeModal() {
     if (!modal || !modalCard) return;
+    if (modalVideoIframe) modalVideoIframe.src = '';
+    showPhoto();
     modal.classList.remove('opacity-100', 'pointer-events-auto');
     modal.classList.add('opacity-0', 'pointer-events-none');
     modalCard.classList.remove('scale-100');

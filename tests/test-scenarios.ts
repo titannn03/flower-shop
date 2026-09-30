@@ -263,6 +263,44 @@ async function runTests() {
   );
 
   // ----------------------------------------------------
+  // TC-17: Product Edit / Update persistence
+  // ----------------------------------------------------
+  const targetProduct = products[0];
+  const oldPrice = targetProduct.price;
+  const updatedProduct = db.updateProduct(targetProduct.id, {
+    price: oldPrice + 25000,
+    flower_components: 'Hoa hồng nhập khẩu đặc biệt'
+  });
+  const recheckProduct = db.getProductById(targetProduct.id);
+  assert(
+    'TC-17: Admin can edit product fields and changes persist in DB',
+    'TC',
+    !!updatedProduct &&
+      recheckProduct?.price === oldPrice + 25000 &&
+      recheckProduct?.flower_components === 'Hoa hồng nhập khẩu đặc biệt',
+    'Failed to edit product'
+  );
+  // Revert back
+  db.updateProduct(targetProduct.id, {
+    price: oldPrice,
+    flower_components: targetProduct.flower_components
+  });
+
+  // ----------------------------------------------------
+  // TC-18: Media Gallery supports Video Embeds alongside Images
+  // ----------------------------------------------------
+  const productWithVideo = db.getProductById('prod-1');
+  const hasVideoItem = productWithVideo?.images?.some(
+    img => img.media_type === 'video' && img.video_provider === 'youtube' && !!img.video_embed_url
+  );
+  assert(
+    'TC-18: Product gallery supports mixed images and embedded videos (YouTube/TikTok)',
+    'TC',
+    Boolean(hasVideoItem),
+    'Expected product to contain embedded video item'
+  );
+
+  // ----------------------------------------------------
   // Summary
   // ----------------------------------------------------
   const total = results.length;
