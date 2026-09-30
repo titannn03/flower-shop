@@ -11,8 +11,8 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
 ---
 
 <AdminLayout 
-  title="Quản lý Phân loại Dịp tặng" 
-  subtitle="Thêm, chỉnh sửa, sắp xếp thứ tự và bật/tắt các danh mục dịp tặng hiển thị trên website"
+  title="Quản lý Loại Sản phẩm" 
+  subtitle="Thêm, chỉnh sửa, sắp xếp thứ tự và bật/tắt các danh mục loại Sản phẩm hiển thị trên website"
 >
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
     
@@ -21,7 +21,7 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
       <div class="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-5 sticky top-6">
         <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
           <h2 id="form-heading" class="text-base font-serif font-bold text-neutral-900">
-            Thêm Dịp Tặng Mới
+            Thêm Loại Sản phẩm Mới
           </h2>
           <span id="edit-badge" class="hidden px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
             Đang sửa
@@ -34,7 +34,7 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
           <!-- Name -->
           <div>
             <label for="occasion-name" class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
-              Tên dịp tặng <span class="text-rose-500">*</span>
+              Tên loại Sản phẩm <span class="text-rose-500">*</span>
             </label>
             <input 
               type="text" 
@@ -50,7 +50,7 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label for="occasion-slug" class="block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                Mã định danh (Slug) <span class="text-rose-500">*</span>
+                Mã định danh<span class="text-rose-500">*</span>
               </label>
               <button 
                 type="button" 
@@ -68,7 +68,6 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
               class="w-full px-4 py-2.5 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-primary focus:outline-none text-sm font-mono text-xs"
               placeholder="vi-du: ngay-cua-me"
             />
-            <p class="text-[11px] text-neutral-400 mt-1">Dùng trong URL lọc (ví dụ: /?occasion=sinh-nhat)</p>
           </div>
 
           <!-- Sort Order & Active -->
@@ -109,7 +108,7 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
               id="submit-btn" 
               class="flex-1 btn-pill-primary py-2.5 text-sm font-semibold justify-center shadow-md"
             >
-              Lưu Dịp Tặng
+              Lưu Loại Sản phẩm
             </button>
             <button 
               type="button" 
@@ -280,8 +279,8 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
   function resetForm() {
     form.reset();
     idInput.value = '';
-    formHeading.textContent = 'Thêm Dịp Tặng Mới';
-    submitBtn.textContent = 'Lưu Dịp Tặng';
+    formHeading.textContent = 'Thêm loại Sản phẩm Mới';
+    submitBtn.textContent = 'Lưu loại Sản phẩm';
     editBadge.classList.add('hidden');
     cancelBtn.classList.add('hidden');
     isCustomSlug = false;
@@ -307,8 +306,8 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
       orderInput.value = order;
       activeInput.checked = active;
 
-      formHeading.textContent = 'Chỉnh Sửa Dịp Tặng';
-      submitBtn.textContent = 'Cập Nhật Dịp Tặng';
+      formHeading.textContent = 'Chỉnh Sửa loại Sản phẩm';
+      submitBtn.textContent = 'Cập Nhật loại Sản phẩm';
       editBadge.classList.remove('hidden');
       cancelBtn.classList.remove('hidden');
       isCustomSlug = true;
@@ -349,13 +348,13 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
         if (data.success) {
           window.location.reload();
         } else {
-          alert(data.error?.message || 'Có lỗi xảy ra khi lưu dịp tặng');
+          alert(data.error?.message || 'Có lỗi xảy ra khi lưu loại Sản phẩm');
         }
       } catch (err) {
         alert('Lỗi kết nối máy chủ');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = isEdit ? 'Cập Nhật Dịp Tặng' : 'Lưu Dịp Tặng';
+        submitBtn.textContent = isEdit ? 'Cập Nhật loại Sản phẩm' : 'Lưu loại Sản phẩm';
       }
     });
   }
@@ -400,7 +399,7 @@ const occasions = db.getAllAdminOccasions().map(occ => ({
 
       let confirmMsg = `Bạn có chắc chắn muốn xóa phân loại "${name}"?`;
       if (count > 0) {
-        confirmMsg = `Phân loại "${name}" đang được gắn cho ${count} sản phẩm. Xóa phân loại sẽ gỡ dịp tặng này khỏi các sản phẩm đó. Bạn vẫn muốn tiếp tục?`;
+        confirmMsg = `Phân loại "${name}" đang được gắn cho ${count} sản phẩm. Xóa phân loại sẽ gỡ loại Sản phẩm này khỏi các sản phẩm đó. Bạn vẫn muốn tiếp tục?`;
       }
 
       if (!confirm(confirmMsg)) return;

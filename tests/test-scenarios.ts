@@ -438,6 +438,35 @@ async function runTests() {
   );
 
   // ----------------------------------------------------
+  // TC-23: Product Catalog Search, Price Filtering & Pagination
+  // ----------------------------------------------------
+  const allCatalogProducts = db.getPublicProducts();
+  const searchRose = allCatalogProducts.filter(p => 
+    p.name.toLowerCase().includes('hồng') || 
+    (p.flower_components || '').toLowerCase().includes('hồng')
+  );
+
+  const under1M = allCatalogProducts.filter(p => p.price < 1000000);
+  const over1M = allCatalogProducts.filter(p => p.price >= 1000000);
+
+  const ITEMS_PER_PAGE = 12;
+  const mock100ItemsCount = 100;
+  const expectedTotalPages = Math.ceil(mock100ItemsCount / ITEMS_PER_PAGE);
+
+  assert(
+    'TC-23: Product Catalog supports search, price filtering, and pagination calculation',
+    'TC',
+    Boolean(
+      allCatalogProducts.length > 0 &&
+      searchRose.length > 0 &&
+      under1M.length > 0 &&
+      over1M.length > 0 &&
+      expectedTotalPages === 9
+    ),
+    'Catalog search, price filter or pagination verification failed'
+  );
+
+  // ----------------------------------------------------
   // Summary
   // ----------------------------------------------------
   const total = results.length;

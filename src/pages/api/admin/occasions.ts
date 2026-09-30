@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return new Response(
-        JSON.stringify({ success: false, error: { code: 'BAD_REQUEST', message: 'Tên phân loại dịp tặng là bắt buộc' } }),
+        JSON.stringify({ success: false, error: { code: 'BAD_REQUEST', message: 'Tên phân loại loại Sản phẩm là bắt buộc' } }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -71,7 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     return new Response(
-      JSON.stringify({ success: true, data: created, message: 'Thêm phân loại dịp tặng thành công' }),
+      JSON.stringify({ success: true, data: created, message: 'Thêm phân loại loại Sản phẩm thành công' }),
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
@@ -89,7 +89,7 @@ export const PATCH: APIRoute = async ({ request }) => {
 
     if (!id) {
       return new Response(
-        JSON.stringify({ success: false, error: { code: 'BAD_REQUEST', message: 'Thiếu ID phân loại dịp tặng' } }),
+        JSON.stringify({ success: false, error: { code: 'BAD_REQUEST', message: 'Thiếu ID phân loại loại Sản phẩm' } }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -97,7 +97,7 @@ export const PATCH: APIRoute = async ({ request }) => {
     const existing = db.getOccasionById(id);
     if (!existing) {
       return new Response(
-        JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy phân loại dịp tặng' } }),
+        JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy phân loại loại Sản phẩm' } }),
         { status: 404, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -122,7 +122,7 @@ export const PATCH: APIRoute = async ({ request }) => {
     const updated = db.updateOccasion(id, updates);
 
     return new Response(
-      JSON.stringify({ success: true, data: updated, message: 'Cập nhật phân loại dịp tặng thành công' }),
+      JSON.stringify({ success: true, data: updated, message: 'Cập nhật phân loại loại Sản phẩm thành công' }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
@@ -143,7 +143,7 @@ export const DELETE: APIRoute = async ({ request, url }) => {
 
     if (!id) {
       return new Response(
-        JSON.stringify({ success: false, error: { code: 'BAD_REQUEST', message: 'Thiếu ID phân loại dịp tặng' } }),
+        JSON.stringify({ success: false, error: { code: 'BAD_REQUEST', message: 'Thiếu ID phân loại loại Sản phẩm' } }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -157,7 +157,7 @@ export const DELETE: APIRoute = async ({ request, url }) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Xóa phân loại dịp tặng thành công' }),
+      JSON.stringify({ success: true, message: 'Xóa phân loại loại Sản phẩm thành công' }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
