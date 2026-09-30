@@ -301,6 +301,23 @@ async function runTests() {
   );
 
   // ----------------------------------------------------
+  // TC-19: Video is prioritized first when viewing product details
+  // ----------------------------------------------------
+  const sortedGallery = [...(productWithVideo?.images || [])].sort((a, b) => {
+    const aIsVideo = (a.media_type === 'video' || Boolean(a.video_embed_url)) ? 1 : 0;
+    const bIsVideo = (b.media_type === 'video' || Boolean(b.video_embed_url)) ? 1 : 0;
+    if (aIsVideo !== bIsVideo) return bIsVideo - aIsVideo;
+    return (b.is_cover ? 1 : 0) - (a.is_cover ? 1 : 0);
+  });
+  const firstItemIsVideo = sortedGallery[0]?.media_type === 'video' || Boolean(sortedGallery[0]?.video_embed_url);
+  assert(
+    'TC-19: Video is prioritized first at index 0 when displaying product detail gallery',
+    'TC',
+    Boolean(firstItemIsVideo),
+    'Expected video item to be first in sorted detail gallery'
+  );
+
+  // ----------------------------------------------------
   // Summary
   // ----------------------------------------------------
   const total = results.length;

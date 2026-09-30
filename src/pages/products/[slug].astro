@@ -20,9 +20,14 @@ if (!product || product.status !== 'published') {
 
 const settings = db.getSettings();
 
-// Images handling: cover first, then gallery
+// Images & Video handling: PRIORITIZE VIDEO FIRST when viewing product detail if product has video
 const images = product.images && product.images.length > 0
-  ? [...product.images].sort((a, b) => (b.is_cover ? 1 : 0) - (a.is_cover ? 1 : 0))
+  ? [...product.images].sort((a, b) => {
+      const aIsVideo = (a.media_type === 'video' || Boolean(a.video_embed_url)) ? 1 : 0;
+      const bIsVideo = (b.media_type === 'video' || Boolean(b.video_embed_url)) ? 1 : 0;
+      if (aIsVideo !== bIsVideo) return bIsVideo - aIsVideo;
+      return (b.is_cover ? 1 : 0) - (a.is_cover ? 1 : 0);
+    })
   : [{
       id: 'default-img',
       secure_url: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
@@ -32,6 +37,7 @@ const images = product.images && product.images.length > 0
     }];
 
 const coverImage = images[0];
+const initialIsVideo = coverImage.media_type === 'video' || Boolean(coverImage.video_embed_url);
 
 // Pricing & Discount
 const hasDiscount = Boolean(product.compare_at_price && product.compare_at_price > product.price);
@@ -135,7 +141,7 @@ const pageDesc = product.short_description || `Đặt mua ${product.name} hoa t�
               id="main-product-image"
               src={coverImage.secure_url}
               alt={coverImage.alt_text || product.name}
-              class={`w-full h-full object-cover object-center transition-all duration-300 ${coverImage.media_type === 'video' ? 'hidden' : 'block'}`}
+              class={`w-full h-full object-cover object-center transition-all duration-300 ${initialIsVideo ? 'hidden' : 'block'}`}
               width="800"
               height="1000"
             />
@@ -143,11 +149,11 @@ const pageDesc = product.short_description || `Đặt mua ${product.name} hoa t�
             <!-- Embedded Video Frame container -->
             <div 
               id="main-video-container" 
-              class={`w-full h-full bg-black flex items-center justify-center ${coverImage.media_type === 'video' ? 'block' : 'hidden'}`}
+              class={`w-full h-full bg-black flex items-center justify-center ${initialIsVideo ? 'block' : 'hidden'}`}
             >
               <iframe
                 id="main-video-iframe"
-                src={coverImage.media_type === 'video' ? (coverImage.video_embed_url || '') : ''}
+                src={initialIsVideo ? (coverImage.video_embed_url || '') : ''}
                 class="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowfullscreen
