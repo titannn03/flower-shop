@@ -1,6 +1,7 @@
 // src/lib/store/db.ts
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import type { 
   Product, 
   Occasion, 
@@ -29,7 +30,8 @@ interface DatabaseSchema {
   auditLogs: AuditLog[];
 }
 
-const DATA_FILE = path.resolve(process.cwd(), 'data-store.json');
+const PRIMARY_DATA_FILE = path.resolve(process.cwd(), 'data-store.json');
+const TMP_DATA_FILE = path.resolve(os.tmpdir(), 'flower-shop-data-store.json');
 
 class DataStore {
   private data: DatabaseSchema;
@@ -39,13 +41,24 @@ class DataStore {
   }
 
   private loadData(): DatabaseSchema {
+    // 1. Try reading from temp file first (persisted across warm serverless requests)
     try {
-      if (fs.existsSync(DATA_FILE)) {
-        const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      if (fs.existsSync(TMP_DATA_FILE)) {
+        const raw = fs.readFileSync(TMP_DATA_FILE, 'utf-8');
         return JSON.parse(raw);
       }
     } catch (e) {
-      console.warn('Could not read data-store.json, initializing from defaults:', e);
+      console.warn('Could not read temp data file:', e);
+    }
+
+    // 2. Try reading from primary data-store.json in project root
+    try {
+      if (fs.existsSync(PRIMARY_DATA_FILE)) {
+        const raw = fs.readFileSync(PRIMARY_DATA_FILE, 'utf-8');
+        return JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn('Could not read primary data-store.json, initializing from defaults:', e);
     }
 
     const defaultData: DatabaseSchema = {
@@ -62,11 +75,25 @@ class DataStore {
   }
 
   private persist(dataToSave?: DatabaseSchema) {
+    const d = dataToSave || this.data;
+    const jsonContent = JSON.stringify(d, null, 2);
+
+    let written = false;
+    // Attempt primary file write (works locally and in writable containers)
     try {
-      const d = dataToSave || this.data;
-      fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 2), 'utf-8');
+      fs.writeFileSync(PRIMARY_DATA_FILE, jsonContent, 'utf-8');
+      written = true;
+    } catch {
+      // Primary is read-only (standard in Vercel Serverless Functions)
+    }
+
+    // Always attempt temp directory fallback if primary failed or in serverless
+    try {
+      fs.writeFileSync(TMP_DATA_FILE, jsonContent, 'utf-8');
     } catch (e) {
-      console.error('Failed to write data-store.json:', e);
+      if (!written) {
+        console.error('Failed to write data-store.json to both primary and temp storage:', e);
+      }
     }
   }
 

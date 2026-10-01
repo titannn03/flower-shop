@@ -44,9 +44,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       );
     }
 
-    // Default credential for initial setup
-    const validUser = (username === 'admin' || username === 'admin@flowervibes.vn');
-    const validPass = (password === 'FlowerAdmin@2026');
+    // Credentials validation (supports custom env vars with secure defaults)
+    const configuredUser = process.env.ADMIN_USERNAME || 'admin';
+    const configuredPass = process.env.ADMIN_PASSWORD || 'FlowerAdmin@2026';
+    const validUser = (username === configuredUser || username === 'admin@flowervibes.vn');
+    const validPass = (password === configuredPass);
 
     if (!validUser || !validPass) {
       // Record failed attempt

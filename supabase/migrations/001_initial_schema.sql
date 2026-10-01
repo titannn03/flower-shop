@@ -1,11 +1,12 @@
 -- 001_initial_schema.sql
--- Schema for Flower Shop Website (Landing Page + Admin Dashboard)
--- Conforms to requirements specified in Section 8 & D.4
+-- Schema cho Flower Shop Website (Landing Page + Admin Dashboard)
+-- Dùng để dán trực tiếp vào Supabase SQL editor
 
--- Enable pgcrypto / uuid extension
+BEGIN;
+
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- 1. PROFILES (Extends Supabase auth.users)
+-- 1) Profiles mở rộng từ auth.users
 CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     display_name TEXT,
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 2. PRODUCTS
+-- 2) Products
 CREATE TABLE IF NOT EXISTS public.products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL CHECK (char_length(name) >= 2 AND char_length(name) <= 150),
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS public.products (
     deleted_at TIMESTAMPTZ
 );
 
--- 3. PRODUCT IMAGES
+-- 3) Product images
 CREATE TABLE IF NOT EXISTS public.product_images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
@@ -46,10 +47,11 @@ CREATE TABLE IF NOT EXISTS public.product_images (
     bytes INTEGER,
     is_cover BOOLEAN NOT NULL DEFAULT false,
     sort_order INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    UNIQUE (product_id, secure_url)
 );
 
--- 4. OCCASIONS
+-- 4) Occasions
 CREATE TABLE IF NOT EXISTS public.occasions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
@@ -58,18 +60,18 @@ CREATE TABLE IF NOT EXISTS public.occasions (
     active BOOLEAN NOT NULL DEFAULT true
 );
 
--- 5. PRODUCT OCCASIONS (Many-to-Many)
+-- 5) Product occasions (many-to-many)
 CREATE TABLE IF NOT EXISTS public.product_occasions (
     product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
     occasion_id UUID NOT NULL REFERENCES public.occasions(id) ON DELETE CASCADE,
     PRIMARY KEY (product_id, occasion_id)
 );
 
--- 6. VIDEOS (YouTube / TikTok)
+-- 6) Videos (YouTube / TikTok)
 CREATE TABLE IF NOT EXISTS public.videos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     provider TEXT NOT NULL CHECK (provider IN ('youtube', 'tiktok')),
-    source_url TEXT NOT NULL,
+    source_url TEXT NOT NULL UNIQUE,
     external_id TEXT,
     embed_url TEXT,
     thumbnail_url TEXT,
@@ -80,7 +82,7 @@ CREATE TABLE IF NOT EXISTS public.videos (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 7. TESTIMONIALS
+-- 7) Testimonials
 CREATE TABLE IF NOT EXISTS public.testimonials (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_name TEXT NOT NULL,
@@ -90,20 +92,21 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
     rating INTEGER NOT NULL DEFAULT 5 CHECK (rating >= 1 AND rating <= 5),
     status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
     sort_order INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    UNIQUE (customer_name, content)
 );
 
--- 8. COMMITMENTS
+-- 8) Commitments
 CREATE TABLE IF NOT EXISTS public.commitments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     icon_key TEXT NOT NULL,
-    title TEXT NOT NULL,
+    title TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
     active BOOLEAN NOT NULL DEFAULT true,
     sort_order INTEGER NOT NULL DEFAULT 0
 );
 
--- 9. SITE SETTINGS
+-- 9) Site settings
 CREATE TABLE IF NOT EXISTS public.site_settings (
     key TEXT PRIMARY KEY,
     value JSONB NOT NULL,
@@ -111,7 +114,7 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 10. AUDIT LOGS
+-- 10) Audit logs
 CREATE TABLE IF NOT EXISTS public.audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID,
@@ -123,9 +126,20 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Indexes for performance
-CREATE INDEX IF NOT EXISTS idx_products_status_sort ON public.products(status, sort_order) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_products_featured ON public.products(featured) WHERE status = 'published' AND deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON public.product_images(product_id, sort_order);
-CREATE INDEX IF NOT EXISTS idx_videos_status_sort ON public.videos(status, sort_order);
-CREATE INDEX IF NOT EXISTS idx_testimonials_status_sort ON public.testimonials(status, sort_order);
+-- Indexes để tăng tốc truy vấn
+CREATE INDEX IF NOT EXISTS idx_products_status_sort
+    ON public.products(status, sort_order) WHERE deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_products_featured
+    ON public.products(featured) WHERE status = 'published' AND deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_product_images_product_id
+    ON public.product_images(product_id, sort_order);
+
+CREATE INDEX IF NOT EXISTS idx_videos_status_sort
+    ON public.videos(status, sort_order);
+
+CREATE INDEX IF NOT EXISTS idx_testimonials_status_sort
+    ON public.testimonials(status, sort_order);
+
+COMMIT;
