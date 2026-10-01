@@ -44,10 +44,24 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       );
     }
 
-    // Credentials validation (supports custom env vars with secure defaults)
-    const configuredUser = process.env.ADMIN_USERNAME || 'admin';
-    const configuredPass = process.env.ADMIN_PASSWORD || 'FlowerAdmin@2026';
-    const validUser = (username === configuredUser || username === 'admin@flowervibes.vn');
+    // Credentials validation must come from environment variables in production.
+    const configuredUser = process.env.ADMIN_USERNAME?.trim();
+    const configuredPass = process.env.ADMIN_PASSWORD?.trim();
+
+    if (!configuredUser || !configuredPass) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: {
+            code: 'ADMIN_NOT_CONFIGURED',
+            message: 'Tài khoản admin chưa được cấu hình trên môi trường. Vui lòng đặt ADMIN_USERNAME và ADMIN_PASSWORD trong biến môi trường.'
+          }
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const validUser = (username === configuredUser);
     const validPass = (password === configuredPass);
 
     if (!validUser || !validPass) {
