@@ -76,8 +76,20 @@ export const POST: APIRoute = async ({ request }) => {
           body: cFormData
         });
 
-        const cData = await cRes.json();
-        if (cRes.ok && cData.secure_url) {
+        let cData: any = null;
+        try {
+          cData = await cRes.json();
+        } catch (parseErr) {
+          const text = await cRes.text().catch(() => '');
+          console.warn('Cloudinary response was not valid JSON. Fallback to local upload.', {
+            status: cRes.status,
+            contentType: cRes.headers.get('content-type'),
+            responsePreview: text.slice(0, 220)
+          });
+          cData = null;
+        }
+
+        if (cRes.ok && cData?.secure_url) {
           return new Response(
             JSON.stringify({
               success: true,
@@ -92,6 +104,13 @@ export const POST: APIRoute = async ({ request }) => {
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
           );
+        }
+
+        if (!cRes.ok) {
+          const errorText = typeof cData?.error?.message === 'string'
+            ? cData.error.message
+            : `Cloudinary upload failed with status ${cRes.status}`;
+          console.warn('Cloudinary rejected upload. Falling back to local storage.', errorText);
         }
       } catch (cloudErr) {
         console.warn('Cloudinary upload warning, falling back to local/dataURL:', cloudErr);

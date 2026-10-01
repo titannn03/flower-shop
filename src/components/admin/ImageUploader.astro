@@ -377,8 +377,21 @@ const {
               body: formData
             });
 
-            const result = await res.json();
-            if (result.success && result.data) {
+            let result: any = null;
+            const responseText = await res.text();
+            try {
+              result = responseText ? JSON.parse(responseText) : null;
+            } catch (parseErr) {
+              const preview = responseText.slice(0, 220).replace(/\s+/g, ' ');
+              console.error('Non-JSON upload response from server:', preview);
+              throw new Error(
+                responseText.includes('Cross-site')
+                  ? 'Phản hồi từ server không hợp lệ do lỗi CORS / Cloudflare / Vercel. Vui lòng kiểm tra biến môi trường Cloudinary.'
+                  : 'Phản hồi từ máy chủ không phải JSON hợp lệ.'
+              );
+            }
+
+            if (result?.success && result?.data) {
               addMediaCard({
                 secure_url: result.data.secure_url,
                 media_type: 'image',
@@ -388,10 +401,12 @@ const {
                 is_cover: previewList?.querySelectorAll('.media-item').length === 0
               });
             } else {
-              alert(result.error?.message || 'Lỗi khi tải ảnh');
+              alert(result?.error?.message || 'Lỗi khi tải ảnh');
             }
           } catch (err: any) {
-            alert('Lỗi xử lý ảnh: ' + (err.message || 'Không xác định'));
+            const message = err?.message || 'Không xác định';
+            console.error('Upload failure:', message);
+            alert('Lỗi xử lý ảnh: ' + message);
           } finally {
             if (statusEl) statusEl.classList.add('hidden');
           }

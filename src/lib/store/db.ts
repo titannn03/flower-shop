@@ -30,6 +30,26 @@ interface DatabaseSchema {
   auditLogs: AuditLog[];
 }
 
+function normalizeZaloUrl(value?: string): string {
+  const raw = (value || process.env.PUBLIC_ZALO_PHONE || '').trim();
+  if (!raw) return 'https://zalo.me';
+
+  if (/^https?:\/\//i.test(raw)) {
+    return raw.replace(/^http:\/\//i, 'https://');
+  }
+
+  if (/^zalo\.me\//i.test(raw)) {
+    return `https://${raw}`;
+  }
+
+  if (/^\d[\d\s\-+().]*$/.test(raw)) {
+    const digits = raw.replace(/\D/g, '');
+    return `https://zalo.me/${digits}`;
+  }
+
+  return `https://${raw.replace(/^\/+/, '')}`;
+}
+
 const PRIMARY_DATA_FILE = path.resolve(process.cwd(), 'data-store.json');
 const TMP_DATA_FILE = path.resolve(os.tmpdir(), 'flower-shop-data-store.json');
 
@@ -359,14 +379,26 @@ class DataStore {
 
   // --- SETTINGS ---
   public getSettings(): SiteSettings {
-    return this.data.settings;
+    const settings = this.data.settings;
+    return {
+      ...settings,
+      zalo_config: {
+        ...settings.zalo_config,
+        url: normalizeZaloUrl(settings.zalo_config?.url || process.env.PUBLIC_ZALO_PHONE)
+      }
+    };
   }
 
   public updateSettings(partial: Partial<SiteSettings>): SiteSettings {
+    const nextZaloUrl = normalizeZaloUrl(partial.zalo_config?.url || process.env.PUBLIC_ZALO_PHONE || this.data.settings.zalo_config.url);
     this.data.settings = {
       ...this.data.settings,
       ...partial,
-      zalo_config: { ...this.data.settings.zalo_config, ...(partial.zalo_config || {}) },
+      zalo_config: {
+        ...this.data.settings.zalo_config,
+        ...(partial.zalo_config || {}),
+        url: nextZaloUrl
+      },
       shop_info: { ...this.data.settings.shop_info, ...(partial.shop_info || {}) },
       hero_config: { ...this.data.settings.hero_config, ...(partial.hero_config || {}) },
       seo_config: { ...this.data.settings.seo_config, ...(partial.seo_config || {}) }
