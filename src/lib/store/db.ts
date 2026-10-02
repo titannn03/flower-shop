@@ -62,6 +62,18 @@ class DataStore {
     this.data = this.loadData();
   }
 
+  private createEmptyData(): DatabaseSchema {
+    return {
+      products: [],
+      occasions: [],
+      commitments: [],
+      testimonials: [],
+      videos: [],
+      settings: { ...initialSettings },
+      auditLogs: []
+    };
+  }
+
   private loadData(): DatabaseSchema {
     try {
       if (fs.existsSync(TMP_DATA_FILE)) {
@@ -79,6 +91,10 @@ class DataStore {
       }
     } catch (e) {
       console.warn('Could not read primary data-store.json, initializing from defaults:', e);
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      return this.createEmptyData();
     }
 
     const defaultData: DatabaseSchema = {
@@ -281,7 +297,16 @@ class DataStore {
 
   private async getWorkingData(): Promise<DatabaseSchema> {
     const supabaseData = await this.loadSupabaseData();
-    if (supabaseData) return supabaseData;
+    if (supabaseData) {
+      this.data = supabaseData;
+      return supabaseData;
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      this.data = this.createEmptyData();
+      return this.data;
+    }
+
     return this.data;
   }
 
