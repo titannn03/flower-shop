@@ -30,7 +30,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
     if (body.sort_order !== undefined) body.sort_order = Number(body.sort_order);
 
     // Validate partial
-    const existing = db.getProductById(id);
+    const existing = await db.getProductById(id);
     if (!existing) {
       return new Response(
         JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm' } }),
@@ -54,7 +54,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
       );
     }
 
-    const updated = db.updateProduct(id, body);
+    const updated = await db.updateProduct(id, body);
 
     return new Response(
       JSON.stringify({ success: true, data: updated }),
@@ -82,7 +82,7 @@ export const DELETE: APIRoute = async ({ params }) => {
     }
 
     // Soft delete according to Section 8.2 & BR-01
-    const success = db.softDeleteProduct(id);
+    const success = await db.softDeleteProduct(id);
     if (!success) {
       return new Response(
         JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm cần xóa' } }),
@@ -118,7 +118,7 @@ export const GET: APIRoute = async ({ params }) => {
       );
     }
 
-    const product = db.getProductById(id);
+    const product = await db.getProductById(id);
     if (!product) {
       return new Response(
         JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm' } }),

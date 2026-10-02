@@ -4,7 +4,7 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { db } from '../../../lib/store/db';
 
-const testimonials = db.getAllAdminTestimonials();
+const testimonials = await db.getAllAdminTestimonials();
 ---
 
 <AdminLayout title="Đánh giá Khách hàng" subtitle="Quản lý cảm nhận, đánh giá sao và hình ảnh phản hồi từ khách">

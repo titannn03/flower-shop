@@ -5,13 +5,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import { db } from '../../lib/store/db';
 import { formatCurrencyVND } from '../../lib/validators/product';
 
-const products = db.getAllAdminProducts();
+const products = await db.getAllAdminProducts();
 const activeProducts = products.filter(p => p.status === 'published');
 const featuredProducts = products.filter(p => p.featured);
-const occasions = db.getAllAdminOccasions();
-const testimonials = db.getAllAdminTestimonials();
-const settings = db.getSettings();
-const auditLogs = db.getAuditLogs().slice(0, 8);
+const occasions = await db.getAllAdminOccasions();
+const testimonials = await db.getAllAdminTestimonials();
+const settings = await db.getSettings();
+const auditLogs = (await db.getAuditLogs()).slice(0, 8);
 ---
 
 <AdminLayout title="Bảng điều khiển Quản trị" subtitle="Tổng quan hoạt động và dữ liệu website bán hoa">

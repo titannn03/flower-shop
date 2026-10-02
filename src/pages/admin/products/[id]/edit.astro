@@ -11,13 +11,13 @@ if (!id) {
   return Astro.redirect('/admin/products');
 }
 
-const product = db.getProductById(id);
+const product = await db.getProductById(id);
 
 if (!product) {
   return Astro.redirect('/admin/products');
 }
 
-const occasions = db.getOccasions();
+const occasions = await db.getOccasions();
 const productOccasionSlugs = (product.occasions || []).map(o => o.slug);
 ---
 

@@ -6,9 +6,9 @@ import ProductCard from '../../components/products/ProductCard.astro';
 import ProductDetailModal from '../../components/products/ProductDetailModal.astro';
 import { db } from '../../lib/store/db';
 
-const settings = db.getSettings();
-const allProducts = db.getPublicProducts();
-const occasions = db.getOccasions();
+const settings = await db.getSettings();
+const allProducts = await db.getPublicProducts();
+const occasions = await db.getOccasions();
 
 // All active occasions ensuring 'all' is at front
 const allOccasion = occasions.find(o => o.slug === 'all') || { id: 'occ-all', name: 'Tất cả dịp tặng', slug: 'all', sort_order: 0, active: true };

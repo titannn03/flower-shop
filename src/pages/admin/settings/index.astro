@@ -4,8 +4,8 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { db } from '../../../lib/store/db';
 
-const settings = db.getSettings();
-const commitments = db.getAllAdminCommitments();
+const settings = await db.getSettings();
+const commitments = await db.getAllAdminCommitments();
 ---
 
 <AdminLayout title="Cấu hình Hệ thống & Zalo" subtitle="Tùy chỉnh thông tin liên hệ, liên kết Zalo chuyển đổi, banner và SEO">

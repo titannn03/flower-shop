@@ -4,7 +4,7 @@ import { db } from '../../../lib/store/db';
 
 export const GET: APIRoute = async () => {
   try {
-    const list = db.getAllAdminTestimonials();
+    const list = await db.getAllAdminTestimonials();
     return new Response(
       JSON.stringify({ success: true, data: list }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const created = db.createTestimonial({
+    const created = await db.createTestimonial({
       customer_name,
       content,
       image_url: image_url || '',
@@ -62,7 +62,7 @@ export const PATCH: APIRoute = async ({ request }) => {
       );
     }
 
-    const updated = db.updateTestimonial(id, updates);
+    const updated = await db.updateTestimonial(id, updates);
     return new Response(
       JSON.stringify({ success: true, data: updated }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -87,7 +87,7 @@ export const DELETE: APIRoute = async ({ request }) => {
       );
     }
 
-    db.deleteTestimonial(id);
+    await db.deleteTestimonial(id);
     return new Response(
       JSON.stringify({ success: true, message: 'Đã xóa đánh giá thành công' }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

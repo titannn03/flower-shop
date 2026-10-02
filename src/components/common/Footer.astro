@@ -18,13 +18,12 @@ const shopAddresses = normalizeShopAddresses(shopInfo);
       <!-- Brand & Mission Column (Col 1-5) -->
       <div class="lg:col-span-5 space-y-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21a9 9 0 01-9-9c0-4.97 4.03-9 9-9s9 4.03 9 9a9 9 0 01-9 9zm0 0v-6m-4-3a4 4 0 118 0 4 4 0 01-8 0z" />
-            </svg>
-          </div>
+          <div class="w-10 h-10 md:w-14 md:h-14 rounded-full bg-stone-100 flex items-center justify-center shadow-lg border border-white/20 transform group-hover:scale-110 transition-transform p-1"> 
+            <img src="/logo.png" alt="Tiệm Hoa An Khánh" class="w-full h-full object-contain" /> 
+        </div>
+
           <span class="text-2xl font-serif font-bold text-white tracking-wide">
-            {shopInfo.name || 'FLOWER VIBES'}
+            {shopInfo.name || 'TIỆM HOA AN KHÁNH'}
           </span>
         </div>
         <p class="text-sm text-neutral-400 max-w-sm leading-relaxed">
@@ -115,14 +114,8 @@ const shopAddresses = normalizeShopAddresses(shopInfo);
     </div>
 
     <!-- Copyright and Admin portal entry -->
-    <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
-      <p>{shopInfo.copyright || '© 2026 FLOWER VIBES. All rights reserved.'}</p>
-      <div class="flex items-center gap-4">
-        <span>Designed for conversion via Zalo</span>
-        <a href="/admin" class="text-neutral-500 hover:text-neutral-300 underline transition-colors">
-          Quản trị Admin
-        </a>
-      </div>
+    <div class="pt-8 flex flex-col sm:flex-row items-center justify-center text-xs text-neutral-500 gap-4 text-center">
+      <p>{shopInfo.copyright || '© 2026 TIỆM HOA AN KHÁNH. All rights reserved.'}</p>
     </div>
   </div>
 </footer>

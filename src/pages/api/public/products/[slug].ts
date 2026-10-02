@@ -15,7 +15,7 @@ export const GET: APIRoute = async ({ params }) => {
       );
     }
 
-    const product = db.getProductBySlug(slug);
+    const product = await db.getProductBySlug(slug);
     if (!product || product.status !== 'published') {
       return new Response(
         JSON.stringify({

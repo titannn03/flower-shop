@@ -18,10 +18,10 @@ function slugify(text: string): string {
 
 export const GET: APIRoute = async () => {
   try {
-    const list = db.getAllAdminOccasions().map(occ => ({
+    const list = await Promise.all((await db.getAllAdminOccasions()).map(async (occ) => ({
       ...occ,
-      product_count: db.getOccasionProductCount(occ.slug)
-    }));
+      product_count: await db.getOccasionProductCount(occ.slug)
+    })));
 
     return new Response(
       JSON.stringify({ success: true, data: list }),
@@ -55,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const existing = db.getOccasionBySlug(slug);
+    const existing = await db.getOccasionBySlug(slug);
     if (existing) {
       return new Response(
         JSON.stringify({ success: false, error: { code: 'CONFLICT', message: `Mã định danh (Slug) "${slug}" đã tồn tại. Vui lòng chọn slug khác.` } }),
@@ -63,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const created = db.createOccasion({
+    const created = await db.createOccasion({
       name: name.trim(),
       slug,
       sort_order: Number(sort_order) || 0,
@@ -94,7 +94,7 @@ export const PATCH: APIRoute = async ({ request }) => {
       );
     }
 
-    const existing = db.getOccasionById(id);
+    const existing = await db.getOccasionById(id);
     if (!existing) {
       return new Response(
         JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy phân loại loại Sản phẩm' } }),
@@ -104,7 +104,7 @@ export const PATCH: APIRoute = async ({ request }) => {
 
     // If changing slug, check uniqueness
     if (slug && slug.trim() !== existing.slug) {
-      const slugOccupied = db.getOccasionBySlug(slug.trim());
+      const slugOccupied = await db.getOccasionBySlug(slug.trim());
       if (slugOccupied && slugOccupied.id !== id) {
         return new Response(
           JSON.stringify({ success: false, error: { code: 'CONFLICT', message: `Mã định danh (Slug) "${slug}" đã tồn tại.` } }),
@@ -119,7 +119,7 @@ export const PATCH: APIRoute = async ({ request }) => {
     if (sort_order !== undefined) updates.sort_order = Number(sort_order) || 0;
     if (active !== undefined) updates.active = Boolean(active);
 
-    const updated = db.updateOccasion(id, updates);
+    const updated = await db.updateOccasion(id, updates);
 
     return new Response(
       JSON.stringify({ success: true, data: updated, message: 'Cập nhật phân loại loại Sản phẩm thành công' }),
@@ -148,7 +148,7 @@ export const DELETE: APIRoute = async ({ request, url }) => {
       );
     }
 
-    const result = db.deleteOccasion(id);
+    const result = await db.deleteOccasion(id);
     if (!result.success) {
       return new Response(
         JSON.stringify({ success: false, error: { code: 'FORBIDDEN', message: result.message || 'Không thể xóa phân loại này' } }),

@@ -4,8 +4,8 @@ import { db } from '../../../lib/store/db';
 
 export const GET: APIRoute = async () => {
   try {
-    const settings = db.getSettings();
-    const commitments = db.getCommitments();
+    const settings = await db.getSettings();
+    const commitments = await db.getCommitments();
 
     return new Response(
       JSON.stringify({

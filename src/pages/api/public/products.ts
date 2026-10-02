@@ -7,7 +7,7 @@ export const GET: APIRoute = async ({ request }) => {
     const url = new URL(request.url);
     const occasion = url.searchParams.get('occasion') || undefined;
 
-    const products = db.getPublicProducts(occasion);
+    const products = await db.getPublicProducts(occasion);
 
     return new Response(
       JSON.stringify({

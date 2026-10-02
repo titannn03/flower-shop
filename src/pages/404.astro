@@ -3,7 +3,7 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { db } from '../lib/store/db';
 
-const settings = db.getSettings();
+const settings = await db.getSettings();
 ---
 
 <PublicLayout settings={settings} pageTitle="404 - Không tìm thấy trang | Flower Shop">

@@ -4,9 +4,9 @@ import { db } from '../../../lib/store/db';
 
 export const GET: APIRoute = async () => {
   try {
-    const settings = db.getSettings();
-    const commitments = db.getAllAdminCommitments();
-    const auditLogs = db.getAuditLogs();
+    const settings = await db.getSettings();
+    const commitments = await db.getAllAdminCommitments();
+    const auditLogs = await db.getAuditLogs();
 
     return new Response(
       JSON.stringify({
@@ -50,7 +50,7 @@ export const PATCH: APIRoute = async ({ request }) => {
     }
 
     // Update settings
-    const updated = db.updateSettings({
+    const updated = await db.updateSettings({
       ...(zalo_config && { zalo_config }),
       ...(shop_info && { shop_info }),
       ...(hero_config && { hero_config }),
@@ -61,7 +61,7 @@ export const PATCH: APIRoute = async ({ request }) => {
     if (Array.isArray(commitments)) {
       for (const com of commitments) {
         if (com.id) {
-          db.updateCommitment(com.id, com);
+          await db.updateCommitment(com.id, com);
         }
       }
     }

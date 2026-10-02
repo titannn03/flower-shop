@@ -4,10 +4,10 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { db } from '../../../lib/store/db';
 
-const occasions = db.getAllAdminOccasions().map(occ => ({
+const occasions = await Promise.all((await db.getAllAdminOccasions()).map(async (occ) => ({
   ...occ,
-  product_count: db.getOccasionProductCount(occ.slug)
-}));
+  product_count: await db.getOccasionProductCount(occ.slug)
+})));
 ---
 
 <AdminLayout 

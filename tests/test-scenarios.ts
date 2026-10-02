@@ -35,10 +35,18 @@ async function runTests() {
   console.log('🧪 RUNNING FLOWER SHOP SPEC VERIFICATION');
   console.log('========================================\n');
 
+  const settingsPromiseCheck = db.getSettings();
+  assert(
+    'TC-00: Data layer exposes async-backed settings loader',
+    'TC',
+    settingsPromiseCheck instanceof Promise,
+    'Settings loader should resolve through async Supabase/local bridge rather than direct local sync reads'
+  );
+
   // ----------------------------------------------------
   // BR-01: Product Catalog & Required Fields
   // ----------------------------------------------------
-  const products = db.getPublicProducts();
+  const products = await db.getPublicProducts();
   assert(
     'BR-01: Product Catalog Initialized with published products',
     'BR',
@@ -66,7 +74,7 @@ async function runTests() {
   // ----------------------------------------------------
   // BR-02: Zalo Phone & Configuration
   // ----------------------------------------------------
-  const settings = db.getSettings();
+  const settings = await db.getSettings();
   const rawPhone = settings.zalo_config.hotline;
   const digitsOnly = rawPhone.replace(/\D/g, '');
   assert(
@@ -123,7 +131,7 @@ async function runTests() {
   // ----------------------------------------------------
   // BR-07: Occasion Filter Coverage
   // ----------------------------------------------------
-  const occasions = db.getOccasions();
+  const occasions = await db.getOccasions();
   const occasionSlugs = occasions.map(o => o.slug);
   assert(
     'BR-07: Standard Occasion Categories Present (sinh-nhat, khai-truong, tinh-yeu, chia-buon)',
@@ -174,7 +182,7 @@ async function runTests() {
   // ----------------------------------------------------
   // TC-05: Product Creation & Soft Delete
   // ----------------------------------------------------
-  const tempProduct = db.createProduct({
+  const tempProduct = await db.createProduct({
     name: 'Hoa Thử Nghiệm Soft Delete',
     slug: 'hoa-thu-nghiem-soft-delete',
     price: 150000,
@@ -192,8 +200,8 @@ async function runTests() {
     'Failed to create product'
   );
 
-  const deleted = db.softDeleteProduct(tempProduct.id);
-  const reCheck = db.getProductById(tempProduct.id);
+  const deleted = await db.softDeleteProduct(tempProduct.id);
+  const reCheck = await db.getProductById(tempProduct.id);
   assert(
     'TC-05: Soft delete marks product as hidden with deleted_at timestamp',
     'TC',
@@ -204,7 +212,7 @@ async function runTests() {
   // ----------------------------------------------------
   // TC-06: Videos and Testimonials Availability
   // ----------------------------------------------------
-  const publicVideos = db.getPublicVideos();
+  const publicVideos = await db.getPublicVideos();
   assert(
     'TC-06: Video records loaded for Landing Page',
     'TC',
@@ -212,7 +220,7 @@ async function runTests() {
     `No public videos found: count ${publicVideos.length}`
   );
 
-  const publicTestimonials = db.getPublicTestimonials();
+  const publicTestimonials = await db.getPublicTestimonials();
   assert(
     'TC-06: Testimonial reviews loaded with ratings >= 4',
     'TC',
@@ -224,14 +232,14 @@ async function runTests() {
   // TC-14: Admin Settings Update
   // ----------------------------------------------------
   const originalBrand = settings.shop_info.name;
-  db.updateSettings({
+  await db.updateSettings({
     shop_info: {
       ...settings.shop_info,
       name: 'Tiệm Hoa Flower Corner VIP'
     }
   });
 
-  const checkUpdated = db.getSettings();
+  const checkUpdated = await db.getSettings();
   assert(
     'TC-14: Admin can update settings and persist',
     'TC',
@@ -240,7 +248,7 @@ async function runTests() {
   );
 
   // Restore original
-  db.updateSettings({
+  await db.updateSettings({
     shop_info: {
       ...settings.shop_info,
       name: originalBrand
@@ -251,7 +259,7 @@ async function runTests() {
   // TC-15 & TC-16: Product Detail View & Slug Retrieval
   // ----------------------------------------------------
   const firstProd = products[0];
-  const prodBySlug = db.getProductBySlug(firstProd.slug);
+  const prodBySlug = await db.getProductBySlug(firstProd.slug);
   assert(
     'TC-15: Product detail retrieved by slug with complete fields',
     'TC',
@@ -262,7 +270,7 @@ async function runTests() {
     'Failed to retrieve product detail by slug'
   );
 
-  const nonExistent = db.getProductBySlug('non-existent-flower-slug-xyz');
+  const nonExistent = await db.getProductBySlug('non-existent-flower-slug-xyz');
   assert(
     'TC-16: Non-existent product slug returns undefined (handled by 404)',
     'TC',
@@ -275,11 +283,11 @@ async function runTests() {
   // ----------------------------------------------------
   const targetProduct = products[0];
   const oldPrice = targetProduct.price;
-  const updatedProduct = db.updateProduct(targetProduct.id, {
+  const updatedProduct = await db.updateProduct(targetProduct.id, {
     price: oldPrice + 25000,
     flower_components: 'Hoa hồng nhập khẩu đặc biệt'
   });
-  const recheckProduct = db.getProductById(targetProduct.id);
+  const recheckProduct = await db.getProductById(targetProduct.id);
   assert(
     'TC-17: Admin can edit product fields and changes persist in DB',
     'TC',
@@ -289,7 +297,7 @@ async function runTests() {
     'Failed to edit product'
   );
   // Revert back
-  db.updateProduct(targetProduct.id, {
+  await db.updateProduct(targetProduct.id, {
     price: oldPrice,
     flower_components: targetProduct.flower_components
   });
@@ -297,7 +305,7 @@ async function runTests() {
   // ----------------------------------------------------
   // TC-18: Media Gallery supports Video Embeds alongside Images
   // ----------------------------------------------------
-  const productWithVideo = db.getProductById('prod-1');
+  const productWithVideo = await db.getProductById('prod-1');
   const hasVideoItem = productWithVideo?.images?.some(
     img => img.media_type === 'video' && img.video_provider === 'youtube' && !!img.video_embed_url
   );
@@ -358,12 +366,12 @@ async function runTests() {
   // ----------------------------------------------------
   // TC-21: Commitments Management & Content Update
   // ----------------------------------------------------
-  const initialComs = db.getAllAdminCommitments();
+  const initialComs = await db.getAllAdminCommitments();
   const targetCom = initialComs[0];
   const oldTitle = targetCom.title;
   const oldDesc = targetCom.description;
 
-  const updatedCom = db.updateCommitment(targetCom.id, {
+  const updatedCom = await db.updateCommitment(targetCom.id, {
     title: 'Hoa Tươi Cao Cấp Tuyển Chọn Loại 1',
     description: 'Cam kết 100% hoa tươi loại 1 tuyển chọn kỹ lưỡng mỗi sáng sớm.',
     icon_key: 'award',
@@ -371,7 +379,7 @@ async function runTests() {
     active: true
   });
 
-  const checkCom = db.getAllAdminCommitments().find(c => c.id === targetCom.id);
+  const checkCom = (await db.getAllAdminCommitments()).find(c => c.id === targetCom.id);
   assert(
     'TC-21: Admin can update commitment title, description, icon, and sort order with persistence',
     'TC',
@@ -385,7 +393,7 @@ async function runTests() {
   );
 
   // Restore original
-  db.updateCommitment(targetCom.id, {
+  await db.updateCommitment(targetCom.id, {
     title: oldTitle,
     description: oldDesc,
     icon_key: targetCom.icon_key,
@@ -396,31 +404,31 @@ async function runTests() {
   // ----------------------------------------------------
   // TC-22: Occasions Management & Public Filtering Integration
   // ----------------------------------------------------
-  const createdOcc = db.createOccasion({
+  const createdOcc = await db.createOccasion({
     name: 'Ngày Của Mẹ',
     slug: 'ngay-cua-me-test',
     sort_order: 99,
     active: true
   });
 
-  const publicOccasionsWithNew = db.getOccasions();
+  const publicOccasionsWithNew = await db.getOccasions();
   const hasNewOccasionInPublic = publicOccasionsWithNew.some(o => o.slug === 'ngay-cua-me-test');
 
   // Test toggling active to false
-  db.updateOccasion(createdOcc.id, { active: false });
-  const publicOccasionsAfterDeactivate = db.getOccasions();
+  await db.updateOccasion(createdOcc.id, { active: false });
+  const publicOccasionsAfterDeactivate = await db.getOccasions();
   const hiddenFromPublic = !publicOccasionsAfterDeactivate.some(o => o.slug === 'ngay-cua-me-test');
 
   // Test updating name
-  db.updateOccasion(createdOcc.id, { name: 'Ngày Của Mẹ Yêu Thương', active: true });
-  const recheckedOcc = db.getOccasionById(createdOcc.id);
+  await db.updateOccasion(createdOcc.id, { name: 'Ngày Của Mẹ Yêu Thương', active: true });
+  const recheckedOcc = await db.getOccasionById(createdOcc.id);
 
   // Test system protection on 'all'
-  const cannotDeleteAll = db.deleteOccasion('occ-1').success === false;
+  const cannotDeleteAll = (await db.deleteOccasion('occ-1')).success === false;
 
   // Test deletion of custom occasion
-  const deletedCustom = db.deleteOccasion(createdOcc.id).success === true;
-  const afterDeletePublic = !db.getOccasions().some(o => o.id === createdOcc.id);
+  const deletedCustom = (await db.deleteOccasion(createdOcc.id)).success === true;
+  const afterDeletePublic = !(await db.getOccasions()).some(o => o.id === createdOcc.id);
 
   assert(
     'TC-22: Occasions CRUD, active toggles, and public filter synchronization',
@@ -440,7 +448,7 @@ async function runTests() {
   // ----------------------------------------------------
   // TC-23: Product Catalog Search, Price Filtering & Pagination
   // ----------------------------------------------------
-  const allCatalogProducts = db.getPublicProducts();
+  const allCatalogProducts = await db.getPublicProducts();
   const searchRose = allCatalogProducts.filter(p => 
     p.name.toLowerCase().includes('hồng') || 
     (p.flower_components || '').toLowerCase().includes('hồng')

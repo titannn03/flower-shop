@@ -49,7 +49,7 @@ export function parseVideoUrl(url: string): { provider: VideoProvider; externalI
 
 export const GET: APIRoute = async () => {
   try {
-    const videos = db.getAllAdminVideos();
+    const videos = await db.getAllAdminVideos();
     return new Response(
       JSON.stringify({ success: true, data: videos }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -88,7 +88,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const video = db.createVideo({
+    const video = await db.createVideo({
       provider: parsed.provider,
       source_url,
       external_id: parsed.externalId,
@@ -136,7 +136,7 @@ export const PATCH: APIRoute = async ({ request }) => {
       }
     }
 
-    const updated = db.updateVideo(id, updates);
+    const updated = await db.updateVideo(id, updates);
     return new Response(
       JSON.stringify({ success: true, data: updated }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -161,7 +161,7 @@ export const DELETE: APIRoute = async ({ request }) => {
       );
     }
 
-    db.deleteVideo(id);
+    await db.deleteVideo(id);
     return new Response(
       JSON.stringify({ success: true, message: 'Đã xóa video thành công' }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

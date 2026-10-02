@@ -11,14 +11,14 @@ if (!slug) {
   return Astro.redirect('/404');
 }
 
-const product = db.getProductBySlug(slug);
+const product = await db.getProductBySlug(slug);
 
 // If product doesn't exist or is not published, redirect to 404
 if (!product || product.status !== 'published') {
   return Astro.redirect('/404');
 }
 
-const settings = db.getSettings();
+const settings = await db.getSettings();
 
 // Images & Video handling: PRIORITIZE VIDEO FIRST when viewing product detail if product has video
 const images = product.images && product.images.length > 0
@@ -55,7 +55,7 @@ const savingsAmount = hasDiscount ? product.compare_at_price! - product.price : 
 
 // Related products (same occasion or others, excluding current)
 const currentOccasionSlugs = (product.occasions || []).map(o => o.slug);
-const allPublished = db.getPublicProducts();
+const allPublished = await db.getPublicProducts();
 const relatedProducts = allPublished
   .filter(p => p.id !== product.id)
   .sort((a, b) => {

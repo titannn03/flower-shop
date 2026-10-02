@@ -6,7 +6,7 @@ import { validateProduct, slugify } from '../../../lib/validators/product';
 // GET: All products for admin (including drafts and hidden)
 export const GET: APIRoute = async () => {
   try {
-    const products = db.getAllAdminProducts();
+    const products = await db.getAllAdminProducts();
     return new Response(
       JSON.stringify({
         success: true,
@@ -64,12 +64,12 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Check slug uniqueness
-    const existing = db.getProductBySlug(body.slug);
+    const existing = await db.getProductBySlug(body.slug);
     if (existing) {
       body.slug = `${body.slug}-${Date.now().toString().slice(-4)}`;
     }
 
-    const created = db.createProduct({
+    const created = await db.createProduct({
       name: body.name,
       slug: body.slug,
       sku: body.sku || '',

@@ -9,11 +9,11 @@ import Testimonials from '../components/landing/Testimonials.astro';
 import { db } from '../lib/store/db';
 
 // SSR fetch latest settings & published content
-const settings = db.getSettings();
-const products = db.getPublicProducts();
-const occasions = db.getOccasions();
-const commitments = db.getCommitments();
-const testimonials = db.getPublicTestimonials();
+const settings = await db.getSettings();
+const products = await db.getPublicProducts();
+const occasions = await db.getOccasions();
+const commitments = await db.getCommitments();
+const testimonials = await db.getPublicTestimonials();
 ---
 
 <PublicLayout settings={settings}>
